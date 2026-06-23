@@ -1264,10 +1264,40 @@
     }
 
     // Enter key submits
-    document.getElementById('email-input').addEventListener('keydown', e => {
+        document.getElementById('email-input').addEventListener('keydown', e => {
       if (e.key === 'Enter') handleSubmit();
     });
   </script>
+
+<div id="demo-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:24px;">
+  <div style="background:#1a1a1a;border-radius:20px;padding:36px 28px;max-width:400px;width:100%;text-align:center;position:relative;">
+    <button onclick="closeDemo()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#666;font-size:22px;cursor:pointer;">✕</button>
+    <div style="font-size:40px;margin-bottom:16px;">📵</div>
+    <h2 style="color:#fff;font-size:22px;font-weight:800;margin-bottom:8px;">See it in action</h2>
+    <p style="color:#888;font-size:15px;margin-bottom:28px;line-height:1.5;">Enter your number. We'll call you — don't answer — and you'll get a text showing exactly what your customers receive.</p>
+    <input id="demo-phone" type="tel" placeholder="+34 630 455 607" style="width:100%;padding:16px;border-radius:10px;border:1.5px solid #333;background:#111;color:#fff;font-size:16px;font-family:inherit;margin-bottom:16px;box-sizing:border-box;text-align:center;"/>
+    <button onclick="runDemo()" id="demo-btn" style="width:100%;padding:16px;background:#E8440A;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;">Call me now</button>
+    <p id="demo-status" style="color:#888;font-size:14px;margin-top:16px;min-height:20px;"></p>
+  </div>
+</div>
+
+<script>
+function closeDemo(){document.getElementById('demo-modal').style.display='none';document.getElementById('demo-status').textContent='';document.getElementById('demo-phone').value='';document.getElementById('demo-btn').textContent='Call me now';document.getElementById('demo-btn').disabled=false;}
+async function runDemo(){
+  const phone=document.getElementById('demo-phone').value.trim();
+  const btn=document.getElementById('demo-btn');
+  const status=document.getElementById('demo-status');
+  if(!phone){status.textContent='Please enter your phone number.';status.style.color='#E8440A';return;}
+  btn.textContent='Calling you now...';btn.disabled=true;
+  status.style.color='#888';status.textContent="Your phone is about to ring. Don't answer it.";
+  try{
+    const res=await fetch('/.netlify/functions/demo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone})});
+    const data=await res.json();
+    if(data.success){status.style.color='#25D366';status.textContent='✓ Check your messages — that just happened automatically.';btn.textContent='Done!';}
+    else{status.style.color='#E8440A';status.textContent='Something went wrong. Try again.';btn.textContent='Call me now';btn.disabled=false;}
+  }catch(err){status.style.color='#E8440A';status.textContent='Something went wrong. Try again.';btn.textContent='Call me now';btn.disabled=false;}
+}
+</script>
+
 </body>
 </html>
-
