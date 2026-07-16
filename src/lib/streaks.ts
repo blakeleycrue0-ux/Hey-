@@ -1,7 +1,11 @@
 import type { Habit } from '../types'
 import { toKey, daysAgo, weekdayOf } from './date'
 
+export const isPaused = (habit: Habit, date: Date): boolean =>
+  !!habit.pausedUntil && toKey(date) <= habit.pausedUntil
+
 export const isScheduled = (habit: Habit, date: Date): boolean => {
+  if (isPaused(habit, date)) return false
   if (habit.days.length === 0 || habit.days.length === 7) return true
   return habit.days.includes(weekdayOf(date))
 }
@@ -70,6 +74,22 @@ export const completionRate = (habit: Habit, windowDays = 30): number => {
   }
   if (scheduled === 0) return 0
   return Math.round((done / scheduled) * 100)
+}
+
+/** Overall completion rate across all habits for a given week (0 = last 7 days, 1 = the 7 before that, ...). */
+export const weekCompletionRate = (habits: Habit[], weeksAgo: number): number => {
+  let scheduled = 0
+  let done = 0
+  for (let i = weeksAgo * 7; i < weeksAgo * 7 + 7; i++) {
+    const date = daysAgo(i)
+    for (const habit of habits) {
+      if (date < new Date(habit.createdAt)) continue
+      if (!isScheduled(habit, date)) continue
+      scheduled++
+      if (isCompletedOn(habit, date)) done++
+    }
+  }
+  return scheduled === 0 ? 0 : Math.round((done / scheduled) * 100)
 }
 
 /**

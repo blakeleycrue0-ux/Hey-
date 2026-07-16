@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Archive, Trash2, X } from 'lucide-react'
+import { Archive, Bell, Trash2, X } from 'lucide-react'
 import type { Habit, HabitColor, HabitIconKey } from '../types'
 import { HABIT_COLORS, ALL_ICONS, BRAND } from '../types'
 import { HabitIcon } from '../lib/icons'
 import type { NewHabitInput } from '../hooks/useHabits'
+import { requestNotificationPermission } from '../lib/notifications'
 
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
@@ -12,7 +13,7 @@ interface Props {
   open: boolean
   editing: Habit | null
   onClose: () => void
-  onSave: (input: NewHabitInput) => void
+  onSave: (input: NewHabitInput, reminderTime: string | undefined) => void
   onDelete: (id: string) => void
   onArchive: (id: string) => void
 }
@@ -22,6 +23,8 @@ export const AddHabitSheet = ({ open, editing, onClose, onSave, onDelete, onArch
   const [icon, setIcon] = useState<HabitIconKey>(ALL_ICONS[0])
   const [color, setColor] = useState<HabitColor>('navy')
   const [days, setDays] = useState<number[]>([])
+  const [reminderOn, setReminderOn] = useState(false)
+  const [reminderTime, setReminderTimeState] = useState('08:00')
 
   useEffect(() => {
     if (open) {
@@ -29,6 +32,8 @@ export const AddHabitSheet = ({ open, editing, onClose, onSave, onDelete, onArch
       setIcon(editing?.icon ?? ALL_ICONS[Math.floor(Math.random() * ALL_ICONS.length)])
       setColor(editing?.color ?? 'navy')
       setDays(editing?.days ?? [])
+      setReminderOn(!!editing?.reminderTime)
+      setReminderTimeState(editing?.reminderTime ?? '08:00')
     }
   }, [open, editing])
 
@@ -38,7 +43,8 @@ export const AddHabitSheet = ({ open, editing, onClose, onSave, onDelete, onArch
 
   const handleSave = () => {
     if (!name.trim()) return
-    onSave({ name, icon, color, days })
+    if (reminderOn) requestNotificationPermission()
+    onSave({ name, icon, color, days }, reminderOn ? reminderTime : undefined)
     onClose()
   }
 
@@ -140,6 +146,36 @@ export const AddHabitSheet = ({ open, editing, onClose, onSave, onDelete, onArch
                 </button>
               ))}
             </div>
+
+            <p className="mt-4 mb-2 text-xs font-medium uppercase tracking-wide text-zinc-400">Recordatorio</p>
+            <div className="flex items-center gap-3 rounded-xl border border-zinc-200 dark:border-zinc-700 p-3">
+              <Bell size={18} className="text-zinc-400" />
+              <span className="flex-1 text-sm text-zinc-700 dark:text-zinc-300">Avisarme a una hora</span>
+              <button
+                onClick={() => setReminderOn((v) => !v)}
+                className="relative h-6 w-10 shrink-0 rounded-full transition-colors"
+                style={{ background: reminderOn ? HABIT_COLORS[color] : 'rgba(128,128,128,0.3)' }}
+                aria-pressed={reminderOn}
+              >
+                <span
+                  className="absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform"
+                  style={{ transform: reminderOn ? 'translateX(18px)' : 'translateX(2px)' }}
+                />
+              </button>
+              {reminderOn && (
+                <input
+                  type="time"
+                  value={reminderTime}
+                  onChange={(e) => setReminderTimeState(e.target.value)}
+                  className="rounded-lg bg-zinc-50 dark:bg-zinc-800 px-2 py-1 text-sm text-zinc-900 dark:text-zinc-100"
+                />
+              )}
+            </div>
+            {reminderOn && (
+              <p className="mt-1.5 text-[11px] text-zinc-400">
+                Solo avisa mientras Loop esté abierto en el fondo del navegador — en iPhone Safari no hay notificaciones reales en segundo plano sin un servidor.
+              </p>
+            )}
 
             <div className="mt-6 flex gap-2">
               {editing && (

@@ -19,6 +19,8 @@ interface Props {
   onLogout: () => void
   onResetData: () => void
   onOpenArchived: () => void
+  onOpenAchievements: () => void
+  onOpenRoutines: () => void
   onImportHabits: (habits: Habit[]) => void
 }
 

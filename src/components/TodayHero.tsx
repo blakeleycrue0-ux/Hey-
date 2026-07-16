@@ -1,13 +1,16 @@
-import { Flame } from 'lucide-react'
+import { useState } from 'react'
+import { Flame, Share2 } from 'lucide-react'
 import { BRAND, type Habit } from '../types'
 import { perfectDayStreak, isScheduled, isCompletedOn } from '../lib/streaks'
 import { today } from '../lib/date'
+import { shareStreakImage } from '../lib/shareImage'
 
 interface Props {
   habits: Habit[]
 }
 
 export const TodayHero = ({ habits }: Props) => {
+  const [sharing, setSharing] = useState(false)
   const active = habits.filter((h) => !h.archived)
   const scheduledToday = active.filter((h) => isScheduled(h, today()))
   const doneToday = scheduledToday.filter((h) => isCompletedOn(h, today()))
@@ -25,6 +28,18 @@ export const TodayHero = ({ habits }: Props) => {
           ? 'Aún no has empezado hoy.'
           : `${doneToday.length} de ${scheduledToday.length} hábitos hechos.`
 
+  const handleShare = async () => {
+    if (sharing) return
+    setSharing(true)
+    try {
+      await shareStreakImage(habits)
+    } catch {
+      // user cancelled the share sheet or the browser blocked it — nothing to recover
+    } finally {
+      setSharing(false)
+    }
+  }
+
   return (
     <div className="mx-5 mb-3 overflow-hidden rounded-2xl text-white" style={{ background: BRAND }}>
       <div className="flex items-center gap-4 p-4">
@@ -41,6 +56,14 @@ export const TodayHero = ({ habits }: Props) => {
           <p className="text-lg font-bold">{pct}%</p>
           <p className="text-[11px] text-white/60">hoy</p>
         </div>
+        <button
+          onClick={handleShare}
+          disabled={sharing}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 disabled:opacity-50"
+          aria-label="Compartir racha"
+        >
+          <Share2 size={16} />
+        </button>
       </div>
       {scheduledToday.length > 0 && (
         <div className="h-1 w-full bg-white/10">

@@ -1,8 +1,8 @@
-import { Flame, Trophy, Target, Layers, Lock, Sparkles } from 'lucide-react'
+import { Flame, Trophy, Target, Layers, Lock, Sparkles, TrendingDown, TrendingUp, Minus } from 'lucide-react'
 import type { Habit, Plan } from '../types'
 import { HABIT_COLORS, BRAND } from '../types'
 import { HabitIcon } from '../lib/icons'
-import { currentStreak, longestStreak, completionRate, weekdayStats } from '../lib/streaks'
+import { currentStreak, longestStreak, completionRate, weekdayStats, weekCompletionRate } from '../lib/streaks'
 import { Heatmap } from './Heatmap'
 
 interface Props {
@@ -27,6 +27,7 @@ export const StatsView = ({ habits, plan, onOpen, onUpgrade }: Props) => {
         <SummaryTile icon={<Target size={16} />} label="Avg. rate" value={`${avgRate}%`} />
       </div>
 
+      {habits.length > 0 && <WeekCompare habits={habits} />}
       {habits.length > 0 && <OverallInsights habits={habits} plan={plan} onUpgrade={onUpgrade} />}
 
       {habits.length === 0 ? (
@@ -60,6 +61,28 @@ export const StatsView = ({ habits, plan, onOpen, onUpgrade }: Props) => {
           })}
         </div>
       )}
+    </div>
+  )
+}
+
+const WeekCompare = ({ habits }: { habits: Habit[] }) => {
+  const thisWeek = weekCompletionRate(habits, 0)
+  const lastWeek = weekCompletionRate(habits, 1)
+  const diff = thisWeek - lastWeek
+  const Icon = diff > 0 ? TrendingUp : diff < 0 ? TrendingDown : Minus
+  const tone = diff > 0 ? '#059669' : diff < 0 ? '#e11d48' : '#9ca3af'
+
+  return (
+    <div className="mt-4 flex items-center gap-3 rounded-2xl bg-white dark:bg-white/[0.04] border border-black/5 dark:border-white/[0.06] p-4">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{ background: `${tone}1a`, color: tone }}>
+        <Icon size={18} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{thisWeek}% esta semana</p>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          {diff === 0 ? 'Igual que' : diff > 0 ? `${diff} pts más que` : `${Math.abs(diff)} pts menos que`} la semana pasada ({lastWeek}%)
+        </p>
+      </div>
     </div>
   )
 }
