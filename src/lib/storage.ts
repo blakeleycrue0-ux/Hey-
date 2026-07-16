@@ -76,3 +76,12 @@ export const loadPrefs = (): Prefs => {
 export const savePrefs = (prefs: Prefs): void => {
   localStorage.setItem(PREFS_KEY, JSON.stringify(prefs))
 }
+
+const OFFER_SHOWN_KEY = 'loop.offerShown.v1'
+
+/** Date (YYYY-MM-DD) the intro-offer popup was last shown, so it surfaces at most once a day. */
+export const loadLastOfferShown = (): string | null => localStorage.getItem(OFFER_SHOWN_KEY)
+
+export const saveLastOfferShown = (): void => {
+  localStorage.setItem(OFFER_SHOWN_KEY, new Date().toISOString().slice(0, 10))
+}

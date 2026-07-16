@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useHabits } from './hooks/useHabits'
 import { useTheme } from './hooks/useTheme'
 import { useAuth } from './hooks/useAuth'
@@ -15,12 +15,14 @@ import { StatsView } from './components/StatsView'
 import { SettingsOverlay } from './components/SettingsOverlay'
 import { ArchivedHabitsOverlay } from './components/ArchivedHabitsOverlay'
 import { UpgradeModal } from './components/UpgradeModal'
+import { OfferPopup } from './components/OfferPopup'
 import { LoginScreen } from './components/LoginScreen'
 import { OnboardingFlow } from './components/onboarding/OnboardingFlow'
 import { Celebration, type Burst } from './components/Celebration'
 import { HABIT_COLORS, FREE_HABIT_LIMIT, type Habit } from './types'
 import { isScheduled, isCompletedOn } from './lib/streaks'
 import { today, toKey } from './lib/date'
+import { loadLastOfferShown, saveLastOfferShown } from './lib/storage'
 
 function App() {
   const { habits, addHabit, updateHabit, deleteHabit, toggleDate, setArchived, replaceAll } = useHabits()
@@ -35,8 +37,26 @@ function App() {
   const [detailHabit, setDetailHabit] = useState<Habit | null>(null)
   const [burst, setBurst] = useState<Burst | null>(null)
   const [upgradeOpen, setUpgradeOpen] = useState(false)
+  const [upgradeOffer, setUpgradeOffer] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [archivedOpen, setArchivedOpen] = useState(false)
+  const [offerPopupOpen, setOfferPopupOpen] = useState(false)
+
+  useEffect(() => {
+    if (!user?.onboarded || user.plan !== 'free') return
+    const todayKey = new Date().toISOString().slice(0, 10)
+    if (loadLastOfferShown() === todayKey) return
+    const timer = setTimeout(() => {
+      setOfferPopupOpen(true)
+      saveLastOfferShown()
+    }, 5000)
+    return () => clearTimeout(timer)
+  }, [user?.id, user?.onboarded, user?.plan])
+
+  const openUpgrade = (offer = false) => {
+    setUpgradeOffer(offer)
+    setUpgradeOpen(true)
+  }
 
   const activeHabits = habits.filter((h) => !h.archived)
   const archivedHabits = habits.filter((h) => h.archived)
@@ -93,7 +113,7 @@ function App() {
 
   const openAdd = () => {
     if (atFreeLimit) {
-      setUpgradeOpen(true)
+      openUpgrade()
       return
     }
     setEditing(null)
@@ -114,7 +134,7 @@ function App() {
         title={titles[tab]}
         plan={user.plan}
         onOpenSettings={() => setSettingsOpen(true)}
-        onOpenUpgrade={() => setUpgradeOpen(true)}
+        onOpenUpgrade={() => openUpgrade()}
       />
 
       {tab === 'today' && (
@@ -144,7 +164,7 @@ function App() {
       )}
 
       {tab === 'stats' && (
-        <StatsView habits={activeHabits} plan={user.plan} onOpen={setDetailHabit} onUpgrade={() => setUpgradeOpen(true)} />
+        <StatsView habits={activeHabits} plan={user.plan} onOpen={setDetailHabit} onUpgrade={() => openUpgrade()} />
       )}
 
       <TabBar tab={tab} onChange={setTab} onAdd={openAdd} />
@@ -166,7 +186,7 @@ function App() {
         plan={user.plan}
         onClose={() => setDetailHabit(null)}
         onEdit={openEdit}
-        onUpgrade={() => setUpgradeOpen(true)}
+        onUpgrade={() => openUpgrade()}
       />
 
       <SettingsOverlay
@@ -179,7 +199,7 @@ function App() {
         onSetTheme={setTheme}
         prefs={prefs}
         onUpdatePrefs={updatePrefs}
-        onUpgrade={() => setUpgradeOpen(true)}
+        onUpgrade={() => openUpgrade()}
         onLogout={logout}
         onResetData={() => {
           if (confirm('¿Borrar todos los hábitos y empezar de nuevo?')) {
@@ -204,11 +224,21 @@ function App() {
 
       <UpgradeModal
         open={upgradeOpen}
+        offer={upgradeOffer}
         onClose={() => setUpgradeOpen(false)}
         onSelect={(plan) => {
           setPlan(plan)
           setUpgradeOpen(false)
         }}
+      />
+
+      <OfferPopup
+        open={offerPopupOpen}
+        onAccept={() => {
+          setOfferPopupOpen(false)
+          openUpgrade(true)
+        }}
+        onDismiss={() => setOfferPopupOpen(false)}
       />
 
       <Celebration burst={burst} />
