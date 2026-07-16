@@ -9,6 +9,12 @@ export interface Habit {
   /** Set of 'YYYY-MM-DD' dates the habit was completed on. */
   completions: string[]
   archived: boolean
+  /** Last 'YYYY-MM-DD' the habit is paused through (inclusive); unset when not paused. */
+  pausedUntil?: string
+  /** Optional short note per completion date, keyed by 'YYYY-MM-DD'. */
+  notes?: Record<string, string>
+  /** Optional reminder time 'HH:MM' (24h), only fires while the app is open. */
+  reminderTime?: string
 }
 
 export type HabitColor = 'navy' | 'teal' | 'amber' | 'rose' | 'emerald' | 'sky' | 'violet' | 'orange'

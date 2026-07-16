@@ -4,12 +4,14 @@ import {
   ChevronRight,
   Crown,
   Download,
+  ListChecks,
   LogOut,
   Moon,
   RotateCcw,
   Share2,
   Sun,
   SunMoon,
+  Trophy,
   Upload,
 } from 'lucide-react'
 import { BRAND, FREE_HABIT_LIMIT, type Habit, type Plan } from '../types'
@@ -29,6 +31,8 @@ interface Props {
   onLogout: () => void
   onResetData: () => void
   onOpenArchived: () => void
+  onOpenAchievements: () => void
+  onOpenRoutines: () => void
   onImportHabits: (habits: Habit[]) => void
 }
 
@@ -69,6 +73,8 @@ export const SettingsView = ({
   onLogout,
   onResetData,
   onOpenArchived,
+  onOpenAchievements,
+  onOpenRoutines,
   onImportHabits,
 }: Props) => {
   const activeCount = habits.filter((h) => !h.archived).length
@@ -114,6 +120,15 @@ export const SettingsView = ({
           onClick={() => onSetTheme(THEME_CYCLE[theme])}
           chevron
         />
+        {theme === 'system' && (
+          <Row
+            icon={<Moon size={19} />}
+            title="Oscuro automático por horario"
+            subtitle="20:00–7:00, en vez de seguir el sistema"
+            toggle={prefs.darkByTime}
+            onToggle={() => onUpdatePrefs({ darkByTime: !prefs.darkByTime })}
+          />
+        )}
         <Row
           icon={<CalendarIcon />}
           title="La semana empieza en"
@@ -140,6 +155,8 @@ export const SettingsView = ({
           chevron
         />
         <Row icon={<Archive size={19} />} title="Hábitos archivados" subtitle={`${archivedCount} archivados`} onClick={onOpenArchived} chevron />
+        <Row icon={<Trophy size={19} />} title="Logros" subtitle="Insignias por tus hitos" onClick={onOpenAchievements} chevron />
+        <Row icon={<ListChecks size={19} />} title="Rutinas" subtitle="Agrupa hábitos para marcarlos juntos" onClick={onOpenRoutines} chevron />
       </Group>
       <input
         ref={fileInputRef}

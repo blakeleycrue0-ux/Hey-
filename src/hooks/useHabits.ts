@@ -47,6 +47,26 @@ export const useHabits = () => {
     setHabits(next)
   }, [])
 
+  const setPausedUntil = useCallback((id: string, dateKey: string | undefined) => {
+    setHabits((prev) => prev.map((h) => (h.id === id ? { ...h, pausedUntil: dateKey } : h)))
+  }, [])
+
+  const setReminderTime = useCallback((id: string, time: string | undefined) => {
+    setHabits((prev) => prev.map((h) => (h.id === id ? { ...h, reminderTime: time } : h)))
+  }, [])
+
+  const setNote = useCallback((id: string, dateKey: string, note: string) => {
+    setHabits((prev) =>
+      prev.map((h) => {
+        if (h.id !== id) return h
+        const notes = { ...h.notes }
+        if (note.trim()) notes[dateKey] = note.trim()
+        else delete notes[dateKey]
+        return { ...h, notes }
+      }),
+    )
+  }, [])
+
   const toggleDate = useCallback((id: string, dateKey: string) => {
     setHabits((prev) =>
       prev.map((h) => {
@@ -60,5 +80,5 @@ export const useHabits = () => {
     )
   }, [])
 
-  return { habits, addHabit, updateHabit, deleteHabit, toggleDate, setArchived, replaceAll }
+  return { habits, addHabit, updateHabit, deleteHabit, toggleDate, setArchived, replaceAll, setPausedUntil, setNote, setReminderTime }
 }

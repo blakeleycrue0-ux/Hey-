@@ -59,9 +59,10 @@ export const saveProfile = (userId: string, profile: Profile): void => {
 export interface Prefs {
   weekStartsOn: 'monday' | 'sunday'
   autoSortDone: boolean
+  darkByTime: boolean
 }
 
-const DEFAULT_PREFS: Prefs = { weekStartsOn: 'monday', autoSortDone: false }
+const DEFAULT_PREFS: Prefs = { weekStartsOn: 'monday', autoSortDone: false, darkByTime: false }
 
 export const loadPrefs = (): Prefs => {
   try {

@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronLeft, Flame, Pencil, Target, Trophy } from 'lucide-react'
+import { ChevronLeft, Flame, Pause, Pencil, Play, Target, Trophy } from 'lucide-react'
 import type { Habit, Plan } from '../types'
-import { HABIT_COLORS } from '../types'
+import { HABIT_COLORS, BRAND } from '../types'
 import { HabitIcon } from '../lib/icons'
-import { currentStreak, longestStreak, completionRate } from '../lib/streaks'
+import { currentStreak, longestStreak, completionRate, isPaused } from '../lib/streaks'
+import { today, toKey } from '../lib/date'
 import { Heatmap } from './Heatmap'
 import { ProInsights } from './ProInsights'
 
@@ -13,10 +15,25 @@ interface Props {
   onClose: () => void
   onEdit: (habit: Habit) => void
   onUpgrade: () => void
+  onPause: (id: string, days: number) => void
+  onResume: (id: string) => void
+  onSaveNote: (id: string, dateKey: string, note: string) => void
 }
 
-export const HabitDetail = ({ habit, plan, onClose, onEdit, onUpgrade }: Props) => {
+const PAUSE_OPTIONS = [
+  { label: '7 días', days: 7 },
+  { label: '14 días', days: 14 },
+  { label: '30 días', days: 30 },
+]
+
+export const HabitDetail = ({ habit, plan, onClose, onEdit, onUpgrade, onPause, onResume, onSaveNote }: Props) => {
   const color = habit ? HABIT_COLORS[habit.color] : null
+  const todayKey = toKey(today())
+  const [note, setNote] = useState('')
+  const [noteHabitId, setNoteHabitId] = useState<string | null>(null)
+
+  const activeNote = habit && noteHabitId === habit.id ? note : (habit?.notes?.[todayKey] ?? '')
+  const notesList = habit?.notes ? Object.entries(habit.notes).sort((a, b) => b[0].localeCompare(a[0])) : []
 
   return (
     <AnimatePresence>
@@ -52,9 +69,74 @@ export const HabitDetail = ({ habit, plan, onClose, onEdit, onUpgrade }: Props) 
               <StatTile icon={<Target size={16} />} label="30-day" value={`${completionRate(habit)}%`} color={color} />
             </div>
 
-            <div className="mt-6 rounded-2xl bg-white dark:bg-white/[0.04] border border-black/5 dark:border-white/[0.06] p-4">
+            {isPaused(habit, today()) ? (
+              <div className="mt-4 flex items-center gap-3 rounded-2xl bg-white dark:bg-white/[0.04] border border-black/5 dark:border-white/[0.06] p-4">
+                <Pause size={18} className="text-zinc-500" />
+                <p className="flex-1 text-sm text-zinc-600 dark:text-zinc-300">
+                  En pausa hasta {habit.pausedUntil && new Date(habit.pausedUntil).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                </p>
+                <button
+                  onClick={() => onResume(habit.id)}
+                  className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-white"
+                  style={{ background: BRAND }}
+                >
+                  <Play size={12} />
+                  Reanudar
+                </button>
+              </div>
+            ) : (
+              <div className="mt-4 rounded-2xl bg-white dark:bg-white/[0.04] border border-black/5 dark:border-white/[0.06] p-4">
+                <p className="mb-2 flex items-center gap-1.5 text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                  <Pause size={14} />
+                  Pausar hábito
+                </p>
+                <div className="flex gap-2">
+                  {PAUSE_OPTIONS.map((o) => (
+                    <button
+                      key={o.days}
+                      onClick={() => onPause(habit.id, o.days)}
+                      className="flex-1 rounded-lg border border-zinc-200 dark:border-zinc-700 py-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-300"
+                    >
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-4 rounded-2xl bg-white dark:bg-white/[0.04] border border-black/5 dark:border-white/[0.06] p-4">
               <p className="mb-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">Last 18 weeks</p>
               <Heatmap habit={habit} />
+            </div>
+
+            <div className="mt-4 rounded-2xl bg-white dark:bg-white/[0.04] border border-black/5 dark:border-white/[0.06] p-4">
+              <p className="mb-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">Nota de hoy</p>
+              <textarea
+                value={activeNote}
+                onChange={(e) => {
+                  setNoteHabitId(habit.id)
+                  setNote(e.target.value)
+                }}
+                onBlur={() => onSaveNote(habit.id, todayKey, activeNote)}
+                placeholder="¿Cómo te ha ido hoy?"
+                rows={2}
+                className="w-full resize-none rounded-xl bg-zinc-50 dark:bg-zinc-800 p-3 text-sm text-zinc-800 dark:text-zinc-200 outline-none placeholder:text-zinc-400"
+              />
+              {notesList.filter(([d]) => d !== todayKey).length > 0 && (
+                <div className="mt-3 space-y-2 border-t border-black/5 dark:border-white/[0.06] pt-3">
+                  {notesList
+                    .filter(([d]) => d !== todayKey)
+                    .slice(0, 5)
+                    .map(([d, text]) => (
+                      <div key={d}>
+                        <p className="text-[11px] font-medium text-zinc-400">
+                          {new Date(d).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                        </p>
+                        <p className="text-sm text-zinc-600 dark:text-zinc-300">{text}</p>
+                      </div>
+                    ))}
+                </div>
+              )}
             </div>
 
             <div className="mt-4">
