@@ -33,27 +33,24 @@ export const saveTheme = (theme: Theme): void => {
 export const genId = (): string =>
   crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`
 
-export interface StoredUser {
-  name: string
-  email: string
+/** App-specific state per signed-in user (identity itself comes from Supabase auth). */
+export interface Profile {
   plan: Plan
   onboarded: boolean
 }
 
-export const loadUser = (): StoredUser | null => {
+const profileKey = (userId: string) => `${USER_KEY}.${userId}`
+
+export const loadProfile = (userId: string): Profile => {
   try {
-    const raw = localStorage.getItem(USER_KEY)
-    if (!raw) return null
-    return JSON.parse(raw) as StoredUser
+    const raw = localStorage.getItem(profileKey(userId))
+    if (!raw) return { plan: 'free', onboarded: false }
+    return JSON.parse(raw) as Profile
   } catch {
-    return null
+    return { plan: 'free', onboarded: false }
   }
 }
 
-export const saveUser = (user: StoredUser | null): void => {
-  if (user === null) {
-    localStorage.removeItem(USER_KEY)
-    return
-  }
-  localStorage.setItem(USER_KEY, JSON.stringify(user))
+export const saveProfile = (userId: string, profile: Profile): void => {
+  localStorage.setItem(profileKey(userId), JSON.stringify(profile))
 }

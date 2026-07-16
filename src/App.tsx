@@ -22,7 +22,7 @@ import { today, toKey } from './lib/date'
 function App() {
   const { habits, addHabit, updateHabit, deleteHabit, toggleDate } = useHabits()
   const { theme, setTheme } = useTheme()
-  const { user, login, logout, completeOnboarding, setPlan } = useAuth()
+  const { user, loading, loginWithGoogle, logout, completeOnboarding, setPlan } = useAuth()
 
   const [tab, setTab] = useState<Tab>('today')
   const [selectedDate, setSelectedDate] = useState(() => today())
@@ -38,8 +38,12 @@ function App() {
   const restForDay = activeHabits.filter((h) => !isScheduled(h, selectedDate))
   const atFreeLimit = !!user && user.plan === 'free' && activeHabits.length >= FREE_HABIT_LIMIT
 
+  if (loading) {
+    return <div className="min-h-screen bg-cream dark:bg-zinc-950" />
+  }
+
   if (!user) {
-    return <LoginScreen onLogin={login} />
+    return <LoginScreen onLogin={loginWithGoogle} />
   }
 
   if (!user.onboarded) {

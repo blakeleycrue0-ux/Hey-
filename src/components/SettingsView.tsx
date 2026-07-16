@@ -1,9 +1,10 @@
 import { Crown, LogOut, Moon, RotateCcw, Sun, SunMoon, Trash2 } from 'lucide-react'
 import { BRAND, FREE_HABIT_LIMIT, type Plan } from '../types'
-import type { StoredUser, Theme } from '../lib/storage'
+import type { Theme } from '../lib/storage'
+import type { AuthedUser } from '../hooks/useAuth'
 
 interface Props {
-  user: StoredUser
+  user: AuthedUser
   habitCount: number
   theme: Theme
   onSetTheme: (t: Theme) => void
@@ -21,12 +22,16 @@ const PLAN_LABEL: Record<Plan, string> = {
 export const SettingsView = ({ user, habitCount, theme, onSetTheme, onUpgrade, onLogout, onResetData }: Props) => (
   <div className="px-4 pt-2 pb-28">
     <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-white/[0.04] border border-black/5 dark:border-white/[0.06] p-4">
-      <div
-        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-base font-semibold text-white"
-        style={{ background: BRAND }}
-      >
-        {user.name.trim().slice(0, 1).toUpperCase() || '?'}
-      </div>
+      {user.avatarUrl ? (
+        <img src={user.avatarUrl} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover" />
+      ) : (
+        <div
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-base font-semibold text-white"
+          style={{ background: BRAND }}
+        >
+          {user.name.trim().slice(0, 1).toUpperCase() || '?'}
+        </div>
+      )}
       <div className="min-w-0">
         <p className="truncate font-semibold text-zinc-900 dark:text-zinc-100">{user.name}</p>
         <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{user.email}</p>
@@ -74,7 +79,7 @@ export const SettingsView = ({ user, habitCount, theme, onSetTheme, onUpgrade, o
 
     <p className="mt-6 flex items-center justify-center gap-1.5 text-xs text-zinc-400">
       <Trash2 size={12} />
-      Todos tus datos se guardan solo en este dispositivo
+      Tus hábitos se guardan en este dispositivo
     </p>
   </div>
 )

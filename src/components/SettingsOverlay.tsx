@@ -1,11 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft } from 'lucide-react'
 import { SettingsView } from './SettingsView'
-import type { StoredUser, Theme } from '../lib/storage'
+import type { Theme } from '../lib/storage'
+import type { AuthedUser } from '../hooks/useAuth'
 
 interface Props {
   open: boolean
-  user: StoredUser
+  user: AuthedUser
   habitCount: number
   theme: Theme
   onSetTheme: (t: Theme) => void
