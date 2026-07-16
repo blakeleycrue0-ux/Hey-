@@ -45,7 +45,7 @@ export const StatsView = ({ habits, plan, onOpen, onUpgrade }: Props) => {
                 className="w-full rounded-2xl bg-white dark:bg-white/[0.04] border border-black/5 dark:border-white/[0.06] p-4 text-left"
               >
                 <div className="mb-3 flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${color}1a`, color }}>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg text-white" style={{ background: color }}>
                     <HabitIcon name={h.icon} size={16} />
                   </div>
                   <p className="font-medium text-zinc-900 dark:text-zinc-100">{h.name}</p>

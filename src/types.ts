@@ -24,9 +24,9 @@ export const HABIT_COLORS: Record<HabitColor, string> = {
   orange: '#ea580c',
 }
 
-/** Matte navy — the app's primary chrome color (buttons, header icons, PRO badges). */
-export const BRAND = '#1E2A44'
-export const BRAND_SOFT = '#2E3D5C'
+/** Black — the app's primary chrome color (buttons, header icons, PRO badges). */
+export const BRAND = '#111111'
+export const BRAND_SOFT = '#2E2E2E'
 export const CREAM = '#F4F1EA'
 
 export type HabitIconKey =

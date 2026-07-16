@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
-import { Flame } from 'lucide-react'
-import { BRAND } from '../types'
+import { LogoMark } from './LogoMark'
 
 interface Props {
   onLogin: () => void
@@ -23,12 +22,7 @@ export const LoginScreen = ({ onLogin }: Props) => (
       transition={{ duration: 0.45, ease: 'easeOut' }}
       className="mx-auto w-full max-w-sm"
     >
-      <div
-        className="mx-auto mb-7 flex h-20 w-20 items-center justify-center rounded-[26px] shadow-xl"
-        style={{ background: BRAND, boxShadow: `0 16px 32px -12px ${BRAND}66` }}
-      >
-        <Flame size={36} className="text-white" fill="white" />
-      </div>
+      <LogoMark size={80} className="mx-auto mb-7" />
       <h1 className="text-center text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">
         Bienvenido a Loop
       </h1>

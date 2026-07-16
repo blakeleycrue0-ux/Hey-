@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Check, Star, BarChart3, Flame, Infinity as InfinityIcon, Palette } from 'lucide-react'
+import { Check, Star, BarChart3, Infinity as InfinityIcon, Palette } from 'lucide-react'
 import { BRAND, type Plan } from '../types'
+import { LogoMark } from './LogoMark'
 
 interface Props {
   onSelect: (plan: Plan) => void
@@ -25,9 +26,7 @@ export const PaywallScreen = ({ onSelect, onSkip }: Props) => {
   return (
     <div className="flex min-h-screen flex-col px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-[calc(2rem+env(safe-area-inset-top))]">
       <div className="mx-auto w-full max-w-sm flex-1">
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-[22px] shadow-lg" style={{ background: BRAND }}>
-          <Flame size={28} className="text-white" fill="white" />
-        </div>
+        <LogoMark size={64} className="mx-auto mb-5" />
         <h1 className="text-center text-[26px] font-extrabold leading-tight tracking-tight text-zinc-900 dark:text-zinc-100">
           Construye hábitos que de verdad se quedan
         </h1>
