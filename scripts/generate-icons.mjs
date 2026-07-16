@@ -3,31 +3,31 @@ import { mkdirSync } from 'fs';
 
 mkdirSync('public/icons', { recursive: true });
 
-const BRAND = '#1E2A44';
+const SOURCE = 'scripts/assets/logo-source.jpeg';
 
-// Flat, single-color mark: a simple flame (matches the in-app brand mark), no gradients.
-const flame = 'M256 118c-6 0-11 4-13 10-8 24-30 40-30 76 0 26 21 47 47 47s47-21 47-47c0-14-6-24-13-33 12 6 30 24 30 54 0 39-32 71-71 71s-71-32-71-71c0-56 41-84 61-96 6-4 9-8 13-11z';
+// Recolor the navy glyph to pure black on a pure white background, preserving
+// anti-aliased edges (grayscale + contrast stretch, no hard threshold).
+const glyph = sharp(SOURCE).grayscale().normalize();
 
-const svg = `
-<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" rx="112" fill="${BRAND}"/>
-  <path d="${flame}" fill="white"/>
-</svg>`;
-
-const maskableSvg = `
-<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" fill="${BRAND}"/>
-  <g transform="translate(0 20) scale(0.82) translate(46 46)">
-    <path d="${flame}" fill="white"/>
-  </g>
-</svg>`;
+// Pad onto a square white canvas with a safe margin so the mark doesn't touch
+// the edges once iOS applies its own rounded-corner mask.
+const withMargin = async (size) => {
+  const inner = Math.round(size * 0.72);
+  const pane = await glyph.clone().resize(inner, inner, { fit: 'contain', background: '#ffffff' }).toBuffer();
+  return sharp({ create: { width: size, height: size, channels: 3, background: '#ffffff' } })
+    .composite([{ input: pane, gravity: 'center' }])
+    .png();
+};
 
 const sizes = [64, 192, 512];
 for (const size of sizes) {
-  await sharp(Buffer.from(svg)).resize(size, size).png().toFile(`public/icons/icon-${size}.png`);
+  await (await withMargin(size)).toFile(`public/icons/icon-${size}.png`);
 }
-await sharp(Buffer.from(maskableSvg)).resize(512, 512).png().toFile('public/icons/maskable-512.png');
-await sharp(Buffer.from(svg)).resize(180, 180).png().toFile('public/icons/apple-touch-icon.png');
-await sharp(Buffer.from(svg)).resize(32, 32).png().toFile('public/icons/favicon-32.png');
+await (await withMargin(512)).toFile('public/icons/maskable-512.png');
+await (await withMargin(180)).toFile('public/icons/apple-touch-icon.png');
+await (await withMargin(32)).toFile('public/icons/favicon-32.png');
+
+// Standalone in-app mark (used on the login/onboarding/paywall screens).
+await (await withMargin(256)).toFile('public/icons/mark.png');
 
 console.log('Icons generated');

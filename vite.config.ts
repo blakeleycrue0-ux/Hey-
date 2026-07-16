@@ -15,7 +15,7 @@ export default defineConfig({
         name: 'Loop — Build Your Streak',
         short_name: 'Loop',
         description: 'Track daily habits, build streaks, never break the chain.',
-        theme_color: '#1E2A44',
+        theme_color: '#111111',
         background_color: '#F4F1EA',
         display: 'standalone',
         orientation: 'portrait',

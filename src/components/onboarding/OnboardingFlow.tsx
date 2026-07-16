@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronLeft, Flame } from 'lucide-react'
+import { ChevronLeft } from 'lucide-react'
 import { CATEGORIES, HABIT_COLORS, BRAND, type HabitCategory, type HabitColor, type HabitIconKey, type Plan, type SuggestedHabit } from '../../types'
 import type { NewHabitInput } from '../../hooks/useHabits'
 import { HabitIcon } from '../../lib/icons'
 import { PaywallScreen } from '../PaywallScreen'
+import { LogoMark } from '../LogoMark'
 
 type Step = 'welcome' | 'category' | 'habit' | 'paywall'
 
@@ -36,10 +37,8 @@ export const OnboardingFlow = ({ userName, onFinish }: Props) => {
         {step === 'welcome' && (
           <Frame key="welcome">
             <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
-              <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: BRAND }}>
-                <Flame size={30} className="text-white" fill="white" />
-              </div>
-              <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Hola, {userName.split(' ')[0]} 👋</h1>
+              <LogoMark size={64} className="mb-6" />
+              <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Hola, {userName.split(' ')[0]}</h1>
               <p className="mt-2 max-w-xs text-sm text-zinc-500 dark:text-zinc-400">
                 Vamos a crear tu primer hábito. Solo te llevará un minuto.
               </p>
@@ -69,7 +68,7 @@ export const OnboardingFlow = ({ userName, onFinish }: Props) => {
                   }}
                   className="flex flex-col items-center gap-2 rounded-2xl border border-black/5 dark:border-white/[0.06] bg-white dark:bg-white/[0.04] p-4"
                 >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl" style={{ background: `${BRAND}1a`, color: BRAND }}>
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl text-white" style={{ background: BRAND }}>
                     <HabitIcon name={c.icon} size={22} />
                   </div>
                   <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{c.label}</span>
@@ -96,7 +95,7 @@ export const OnboardingFlow = ({ userName, onFinish }: Props) => {
                     background: !usingCustom && choice?.name === h.name ? `${BRAND}0d` : undefined,
                   }}
                 >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: `${HABIT_COLORS[color]}1a`, color: HABIT_COLORS[color] }}>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg text-white" style={{ background: HABIT_COLORS[color] }}>
                     <HabitIcon name={h.icon} size={18} />
                   </div>
                   <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{h.name}</span>

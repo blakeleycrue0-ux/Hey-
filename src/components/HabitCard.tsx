@@ -29,8 +29,8 @@ export const HabitCard = ({ habit, date, onToggle, onOpen }: Props) => {
         className="flex items-center gap-3 flex-1 min-w-0 text-left"
       >
         <div
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
-          style={{ background: `${color}1a`, color }}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white"
+          style={{ background: color }}
         >
           <HabitIcon name={habit.icon} size={20} />
         </div>
