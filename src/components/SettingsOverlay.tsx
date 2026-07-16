@@ -1,19 +1,25 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft } from 'lucide-react'
 import { SettingsView } from './SettingsView'
-import type { Theme } from '../lib/storage'
+import type { Habit } from '../types'
+import type { Prefs, Theme } from '../lib/storage'
 import type { AuthedUser } from '../hooks/useAuth'
 
 interface Props {
   open: boolean
   user: AuthedUser
-  habitCount: number
+  habits: Habit[]
+  archivedCount: number
   theme: Theme
   onSetTheme: (t: Theme) => void
+  prefs: Prefs
+  onUpdatePrefs: (patch: Partial<Prefs>) => void
   onClose: () => void
   onUpgrade: () => void
   onLogout: () => void
   onResetData: () => void
+  onOpenArchived: () => void
+  onImportHabits: (habits: Habit[]) => void
 }
 
 export const SettingsOverlay = ({ open, onClose, ...rest }: Props) => (

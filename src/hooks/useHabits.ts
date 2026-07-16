@@ -39,6 +39,14 @@ export const useHabits = () => {
     setHabits((prev) => prev.filter((h) => h.id !== id))
   }, [])
 
+  const setArchived = useCallback((id: string, archived: boolean) => {
+    setHabits((prev) => prev.map((h) => (h.id === id ? { ...h, archived } : h)))
+  }, [])
+
+  const replaceAll = useCallback((next: Habit[]) => {
+    setHabits(next)
+  }, [])
+
   const toggleDate = useCallback((id: string, dateKey: string) => {
     setHabits((prev) =>
       prev.map((h) => {
@@ -52,5 +60,5 @@ export const useHabits = () => {
     )
   }, [])
 
-  return { habits, addHabit, updateHabit, deleteHabit, toggleDate }
+  return { habits, addHabit, updateHabit, deleteHabit, toggleDate, setArchived, replaceAll }
 }

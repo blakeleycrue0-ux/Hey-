@@ -3,6 +3,7 @@ import type { Habit, Plan } from '../types'
 const HABITS_KEY = 'loop.habits.v1'
 const THEME_KEY = 'loop.theme.v1'
 const USER_KEY = 'loop.user.v1'
+const PREFS_KEY = 'loop.prefs.v1'
 
 export const loadHabits = (): Habit[] => {
   try {
@@ -53,4 +54,25 @@ export const loadProfile = (userId: string): Profile => {
 
 export const saveProfile = (userId: string, profile: Profile): void => {
   localStorage.setItem(profileKey(userId), JSON.stringify(profile))
+}
+
+export interface Prefs {
+  weekStartsOn: 'monday' | 'sunday'
+  autoSortDone: boolean
+}
+
+const DEFAULT_PREFS: Prefs = { weekStartsOn: 'monday', autoSortDone: false }
+
+export const loadPrefs = (): Prefs => {
+  try {
+    const raw = localStorage.getItem(PREFS_KEY)
+    if (!raw) return DEFAULT_PREFS
+    return { ...DEFAULT_PREFS, ...(JSON.parse(raw) as Partial<Prefs>) }
+  } catch {
+    return DEFAULT_PREFS
+  }
+}
+
+export const savePrefs = (prefs: Prefs): void => {
+  localStorage.setItem(PREFS_KEY, JSON.stringify(prefs))
 }

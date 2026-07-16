@@ -1,27 +1,29 @@
 import { BRAND } from '../types'
 import { isSameDay, toKey } from '../lib/date'
+import type { Prefs } from '../lib/storage'
 
 interface Props {
   selected: Date
   onSelect: (date: Date) => void
+  weekStartsOn: Prefs['weekStartsOn']
 }
 
 const DAY_LETTERS = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
 
-const startOfWeek = (date: Date): Date => {
+const startOfWeek = (date: Date, weekStartsOn: Prefs['weekStartsOn']): Date => {
   const d = new Date(date)
   const day = d.getDay()
-  const diff = day === 0 ? -6 : 1 - day // week starts Monday
+  const diff = weekStartsOn === 'sunday' ? -day : day === 0 ? -6 : 1 - day
   d.setDate(d.getDate() + diff)
   d.setHours(0, 0, 0, 0)
   return d
 }
 
-export const WeekStrip = ({ selected, onSelect }: Props) => {
-  const monday = startOfWeek(new Date())
+export const WeekStrip = ({ selected, onSelect, weekStartsOn }: Props) => {
+  const start = startOfWeek(new Date(), weekStartsOn)
   const days = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(monday)
-    d.setDate(monday.getDate() + i)
+    const d = new Date(start)
+    d.setDate(start.getDate() + i)
     return d
   })
   const now = new Date()

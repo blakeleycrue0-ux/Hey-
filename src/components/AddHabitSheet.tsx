@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Trash2, X } from 'lucide-react'
+import { Archive, Trash2, X } from 'lucide-react'
 import type { Habit, HabitColor, HabitIconKey } from '../types'
 import { HABIT_COLORS, ALL_ICONS, BRAND } from '../types'
 import { HabitIcon } from '../lib/icons'
@@ -14,9 +14,10 @@ interface Props {
   onClose: () => void
   onSave: (input: NewHabitInput) => void
   onDelete: (id: string) => void
+  onArchive: (id: string) => void
 }
 
-export const AddHabitSheet = ({ open, editing, onClose, onSave, onDelete }: Props) => {
+export const AddHabitSheet = ({ open, editing, onClose, onSave, onDelete, onArchive }: Props) => {
   const [name, setName] = useState('')
   const [icon, setIcon] = useState<HabitIconKey>(ALL_ICONS[0])
   const [color, setColor] = useState<HabitColor>('navy')
@@ -142,15 +143,28 @@ export const AddHabitSheet = ({ open, editing, onClose, onSave, onDelete }: Prop
 
             <div className="mt-6 flex gap-2">
               {editing && (
-                <button
-                  onClick={() => {
-                    onDelete(editing.id)
-                    onClose()
-                  }}
-                  className="flex items-center justify-center rounded-xl border border-red-200 dark:border-red-900 px-4 py-3 text-red-500"
-                >
-                  <Trash2 size={18} />
-                </button>
+                <>
+                  <button
+                    onClick={() => {
+                      onArchive(editing.id)
+                      onClose()
+                    }}
+                    className="flex items-center justify-center rounded-xl border border-zinc-200 dark:border-zinc-700 px-4 py-3 text-zinc-500"
+                    aria-label="Archivar hábito"
+                  >
+                    <Archive size={18} />
+                  </button>
+                  <button
+                    onClick={() => {
+                      onDelete(editing.id)
+                      onClose()
+                    }}
+                    className="flex items-center justify-center rounded-xl border border-red-200 dark:border-red-900 px-4 py-3 text-red-500"
+                    aria-label="Eliminar hábito"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </>
               )}
               <button
                 onClick={handleSave}
