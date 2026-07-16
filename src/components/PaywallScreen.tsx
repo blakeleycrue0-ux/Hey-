@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { Check, Star, BarChart3, Infinity as InfinityIcon, Palette } from 'lucide-react'
+import { Check, Star, BarChart3, Sparkles, Infinity as InfinityIcon, Palette } from 'lucide-react'
 import { BRAND, type Plan } from '../types'
 import { LogoMark } from './LogoMark'
 
 interface Props {
   onSelect: (plan: Plan) => void
   onSkip?: () => void
+  /** Intro offer: first month at a lower price on the monthly plan. */
+  offer?: boolean
 }
 
 const REVIEWS = [
@@ -20,12 +22,19 @@ const PERKS = [
   { icon: Palette, title: 'Colores e iconos extra', text: 'Personaliza cada hábito a tu manera' },
 ]
 
-export const PaywallScreen = ({ onSelect, onSkip }: Props) => {
-  const [billing, setBilling] = useState<'monthly' | 'annual'>('annual')
+export const PaywallScreen = ({ onSelect, onSkip, offer }: Props) => {
+  const [billing, setBilling] = useState<'monthly' | 'annual'>(offer ? 'monthly' : 'annual')
 
   return (
     <div className="flex min-h-screen flex-col px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-[calc(2rem+env(safe-area-inset-top))]">
       <div className="mx-auto w-full max-w-sm flex-1">
+        {offer && (
+          <div className="mx-auto mb-4 flex w-fit items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-white" style={{ background: BRAND }}>
+            <Sparkles size={13} />
+            Oferta especial solo para ti
+          </div>
+        )}
+
         <LogoMark size={64} className="mx-auto mb-5" />
         <h1 className="text-center text-[26px] font-extrabold leading-tight tracking-tight text-zinc-900 dark:text-zinc-100">
           Construye hábitos que de verdad se quedan
@@ -50,16 +59,18 @@ export const PaywallScreen = ({ onSelect, onSkip }: Props) => {
             selected={billing === 'annual'}
             onClick={() => setBilling('annual')}
             title="Anual"
-            price="4,17 €/mes"
-            badge="Ahorra 50%"
-            sub="Se cobra 49,99 €/año"
+            price="1,08 €/mes"
+            badge="Ahorra 46%"
+            sub="Se cobra 12,99 €/año"
           />
           <PlanOption
             selected={billing === 'monthly'}
             onClick={() => setBilling('monthly')}
             title="Mensual"
-            price="8,99 €/mes"
-            sub="Se cobra cada mes"
+            price={offer ? '0,99 €/mes' : '1,99 €/mes'}
+            originalPrice={offer ? '1,99 €/mes' : undefined}
+            badge={offer ? 'Oferta' : undefined}
+            sub={offer ? 'El primer mes, luego 1,99 €/mes' : 'Se cobra cada mes'}
           />
         </div>
 
@@ -68,7 +79,7 @@ export const PaywallScreen = ({ onSelect, onSkip }: Props) => {
           className="mt-5 w-full rounded-2xl py-3.5 text-[15px] font-semibold text-white shadow-lg"
           style={{ background: BRAND }}
         >
-          Empezar prueba de 7 días gratis
+          {offer ? 'Aprovechar oferta' : 'Empezar prueba de 7 días gratis'}
         </button>
 
         {onSkip && (
@@ -102,6 +113,7 @@ const PlanOption = ({
   onClick,
   title,
   price,
+  originalPrice,
   sub,
   badge,
 }: {
@@ -109,6 +121,7 @@ const PlanOption = ({
   onClick: () => void
   title: string
   price: string
+  originalPrice?: string
   sub: string
   badge?: string
 }) => (
@@ -137,6 +150,9 @@ const PlanOption = ({
         <p className="text-xs text-zinc-500 dark:text-zinc-400">{sub}</p>
       </div>
     </div>
-    <span className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100">{price}</span>
+    <div className="text-right">
+      {originalPrice && <p className="text-xs text-zinc-400 line-through">{originalPrice}</p>}
+      <span className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100">{price}</span>
+    </div>
   </button>
 )

@@ -7,9 +7,10 @@ interface Props {
   open: boolean
   onClose: () => void
   onSelect: (plan: Plan) => void
+  offer?: boolean
 }
 
-export const UpgradeModal = ({ open, onClose, onSelect }: Props) => (
+export const UpgradeModal = ({ open, onClose, onSelect, offer }: Props) => (
   <AnimatePresence>
     {open && (
       <motion.div
@@ -26,7 +27,7 @@ export const UpgradeModal = ({ open, onClose, onSelect }: Props) => (
         >
           <X size={18} />
         </button>
-        <PaywallScreen onSelect={onSelect} />
+        <PaywallScreen onSelect={onSelect} offer={offer} />
       </motion.div>
     )}
   </AnimatePresence>
