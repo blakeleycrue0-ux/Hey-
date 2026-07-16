@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { Habit, HabitColor } from '../types'
+import type { Habit, HabitColor, HabitIconKey } from '../types'
 import { loadHabits, saveHabits, genId } from '../lib/storage'
 import { toKey, today } from '../lib/date'
 
 export interface NewHabitInput {
   name: string
-  icon: string
+  icon: HabitIconKey
   color: HabitColor
   days: number[]
 }

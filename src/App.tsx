@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useHabits } from './hooks/useHabits'
 import { useTheme } from './hooks/useTheme'
+import { useAuth } from './hooks/useAuth'
 import { Header } from './components/Header'
 import { HabitCard } from './components/HabitCard'
 import { EmptyState } from './components/EmptyState'
@@ -8,26 +9,48 @@ import { TabBar, type Tab } from './components/TabBar'
 import { AddHabitSheet } from './components/AddHabitSheet'
 import { HabitDetail } from './components/HabitDetail'
 import { StatsView } from './components/StatsView'
+import { SettingsView } from './components/SettingsView'
+import { UpgradeModal } from './components/UpgradeModal'
+import { LoginScreen } from './components/LoginScreen'
+import { OnboardingFlow } from './components/onboarding/OnboardingFlow'
 import { Celebration, type Burst } from './components/Celebration'
-import { HABIT_COLORS, type Habit } from './types'
+import { HABIT_COLORS, FREE_HABIT_LIMIT, type Habit } from './types'
 import { isScheduled } from './lib/streaks'
 import { today, toKey } from './lib/date'
-import type { Theme } from './lib/storage'
-
-const THEME_CYCLE: Record<Theme, Theme> = { system: 'light', light: 'dark', dark: 'system' }
 
 function App() {
   const { habits, addHabit, updateHabit, deleteHabit, toggleToday } = useHabits()
   const { theme, setTheme } = useTheme()
+  const { user, login, logout, completeOnboarding, setPlan } = useAuth()
+
   const [tab, setTab] = useState<Tab>('today')
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editing, setEditing] = useState<Habit | null>(null)
   const [detailHabit, setDetailHabit] = useState<Habit | null>(null)
   const [burst, setBurst] = useState<Burst | null>(null)
+  const [upgradeOpen, setUpgradeOpen] = useState(false)
 
   const activeHabits = habits.filter((h) => !h.archived)
   const scheduledToday = activeHabits.filter((h) => isScheduled(h, today()))
   const restToday = activeHabits.filter((h) => !isScheduled(h, today()))
+  const atFreeLimit = !!user && user.plan === 'free' && activeHabits.length >= FREE_HABIT_LIMIT
+
+  if (!user) {
+    return <LoginScreen onLogin={login} />
+  }
+
+  if (!user.onboarded) {
+    return (
+      <OnboardingFlow
+        userName={user.name}
+        onFinish={(habitInput, plan) => {
+          addHabit(habitInput)
+          setPlan(plan)
+          completeOnboarding()
+        }}
+      />
+    )
+  }
 
   const handleToggle = (id: string, e: React.MouseEvent) => {
     const habit = habits.find((h) => h.id === id)
@@ -39,7 +62,7 @@ function App() {
         id: `${id}-${Date.now()}`,
         x: rect.left + rect.width / 2,
         y: rect.top + rect.height / 2,
-        color: HABIT_COLORS[habit.color].solid,
+        color: HABIT_COLORS[habit.color],
       })
       setTimeout(() => setBurst(null), 650)
     }
@@ -47,6 +70,10 @@ function App() {
   }
 
   const openAdd = () => {
+    if (atFreeLimit) {
+      setUpgradeOpen(true)
+      return
+    }
     setEditing(null)
     setSheetOpen(true)
   }
@@ -57,17 +84,14 @@ function App() {
     setSheetOpen(true)
   }
 
-  return (
-    <div className="mx-auto min-h-screen max-w-md bg-gradient-to-b from-orange-50/40 via-white to-white dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-950">
-      <Header
-        habits={activeHabits}
-        theme={theme}
-        onCycleTheme={() => setTheme(THEME_CYCLE[theme])}
-        title={tab === 'today' ? 'Loop' : 'Stats'}
-      />
+  const titles: Record<Tab, string> = { today: 'Loop', stats: 'Stats', settings: 'Ajustes' }
 
-      {tab === 'today' ? (
-        activeHabits.length === 0 ? (
+  return (
+    <div className="mx-auto min-h-screen max-w-md bg-white dark:bg-zinc-950">
+      <Header habits={activeHabits} title={titles[tab]} />
+
+      {tab === 'today' &&
+        (activeHabits.length === 0 ? (
           <EmptyState onAdd={openAdd} />
         ) : (
           <div className="space-y-2 px-4 pb-28">
@@ -85,9 +109,26 @@ function App() {
               </>
             )}
           </div>
-        )
-      ) : (
-        <StatsView habits={activeHabits} onOpen={setDetailHabit} />
+        ))}
+
+      {tab === 'stats' && (
+        <StatsView habits={activeHabits} plan={user.plan} onOpen={setDetailHabit} onUpgrade={() => setUpgradeOpen(true)} />
+      )}
+
+      {tab === 'settings' && (
+        <SettingsView
+          user={user}
+          habitCount={activeHabits.length}
+          theme={theme}
+          onSetTheme={setTheme}
+          onUpgrade={() => setUpgradeOpen(true)}
+          onLogout={logout}
+          onResetData={() => {
+            if (confirm('¿Borrar todos los hábitos y empezar de nuevo?')) {
+              activeHabits.forEach((h) => deleteHabit(h.id))
+            }
+          }}
+        />
       )}
 
       <TabBar tab={tab} onChange={setTab} onAdd={openAdd} />
@@ -103,7 +144,22 @@ function App() {
         onDelete={deleteHabit}
       />
 
-      <HabitDetail habit={detailHabit} onClose={() => setDetailHabit(null)} onEdit={openEdit} />
+      <HabitDetail
+        habit={detailHabit}
+        plan={user.plan}
+        onClose={() => setDetailHabit(null)}
+        onEdit={openEdit}
+        onUpgrade={() => setUpgradeOpen(true)}
+      />
+
+      <UpgradeModal
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        onSelect={(plan) => {
+          setPlan(plan)
+          setUpgradeOpen(false)
+        }}
+      />
 
       <Celebration burst={burst} />
     </div>
