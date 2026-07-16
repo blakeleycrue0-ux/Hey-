@@ -11,10 +11,10 @@ export interface Habit {
   archived: boolean
 }
 
-export type HabitColor = 'indigo' | 'teal' | 'amber' | 'rose' | 'emerald' | 'sky' | 'violet' | 'orange'
+export type HabitColor = 'navy' | 'teal' | 'amber' | 'rose' | 'emerald' | 'sky' | 'violet' | 'orange'
 
 export const HABIT_COLORS: Record<HabitColor, string> = {
-  indigo: '#6366f1',
+  navy: '#22314F',
   teal: '#0d9488',
   amber: '#d97706',
   rose: '#e11d48',
@@ -24,7 +24,10 @@ export const HABIT_COLORS: Record<HabitColor, string> = {
   orange: '#ea580c',
 }
 
-export const BRAND = '#5B4FE8'
+/** Matte navy — the app's primary chrome color (buttons, header icons, PRO badges). */
+export const BRAND = '#1E2A44'
+export const BRAND_SOFT = '#2E3D5C'
+export const CREAM = '#F4F1EA'
 
 export type HabitIconKey =
   | 'Droplet' | 'Moon' | 'BookOpen' | 'Dumbbell' | 'PenLine' | 'Heart' | 'Pill' | 'Sun'

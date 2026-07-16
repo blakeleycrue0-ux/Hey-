@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, Star, BarChart3, Infinity as InfinityIcon, Palette } from 'lucide-react'
+import { Check, Star, BarChart3, Flame, Infinity as InfinityIcon, Palette } from 'lucide-react'
 import { BRAND, type Plan } from '../types'
 
 interface Props {
@@ -14,9 +14,9 @@ const REVIEWS = [
 ]
 
 const PERKS = [
-  { icon: InfinityIcon, text: 'Hábitos ilimitados' },
-  { icon: BarChart3, text: 'Analíticas avanzadas y tendencias' },
-  { icon: Palette, text: 'Colores e iconos exclusivos' },
+  { icon: InfinityIcon, title: 'Hábitos ilimitados', text: 'Sin límite en cuántos hábitos puedes seguir' },
+  { icon: BarChart3, title: 'Insights avanzados', text: 'Ve exactamente qué días te funcionan mejor' },
+  { icon: Palette, title: 'Colores e iconos extra', text: 'Personaliza cada hábito a tu manera' },
 ]
 
 export const PaywallScreen = ({ onSelect, onSkip }: Props) => {
@@ -25,25 +25,28 @@ export const PaywallScreen = ({ onSelect, onSkip }: Props) => {
   return (
     <div className="flex min-h-screen flex-col px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-[calc(2rem+env(safe-area-inset-top))]">
       <div className="mx-auto w-full max-w-sm flex-1">
-        <h1 className="text-center text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-          Desbloquea Loop Pro
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-[22px] shadow-lg" style={{ background: BRAND }}>
+          <Flame size={28} className="text-white" fill="white" />
+        </div>
+        <h1 className="text-center text-[26px] font-extrabold leading-tight tracking-tight text-zinc-900 dark:text-zinc-100">
+          Construye hábitos que de verdad se quedan
         </h1>
-        <p className="mt-1 text-center text-sm text-zinc-500 dark:text-zinc-400">
-          Hábitos ilimitados y analíticas completas.
-        </p>
 
-        <div className="mt-6 space-y-3 rounded-2xl bg-white dark:bg-white/[0.04] border border-black/5 dark:border-white/[0.06] p-4">
+        <div className="mt-7 space-y-4">
           {PERKS.map((p) => (
-            <div key={p.text} className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: `${BRAND}1a`, color: BRAND }}>
-                <p.icon size={16} />
+            <div key={p.title} className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: BRAND }}>
+                <p.icon size={18} className="text-white" />
               </div>
-              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{p.text}</span>
+              <div>
+                <p className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100">{p.title}</p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">{p.text}</p>
+              </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-5 space-y-2">
+        <div className="mt-7 space-y-2.5">
           <PlanOption
             selected={billing === 'annual'}
             onClick={() => setBilling('annual')}
@@ -63,7 +66,7 @@ export const PaywallScreen = ({ onSelect, onSkip }: Props) => {
 
         <button
           onClick={() => onSelect(billing)}
-          className="mt-5 w-full rounded-xl py-3.5 text-sm font-semibold text-white shadow-md"
+          className="mt-5 w-full rounded-2xl py-3.5 text-[15px] font-semibold text-white shadow-lg"
           style={{ background: BRAND }}
         >
           Empezar prueba de 7 días gratis
@@ -75,9 +78,9 @@ export const PaywallScreen = ({ onSelect, onSkip }: Props) => {
           </button>
         )}
 
-        <div className="mt-6 space-y-3">
+        <div className="mt-7 space-y-3">
           {REVIEWS.map((r) => (
-            <div key={r.name} className="rounded-xl bg-zinc-50 dark:bg-white/[0.03] p-3">
+            <div key={r.name} className="rounded-2xl bg-white dark:bg-white/[0.04] p-3.5 shadow-sm">
               <div className="mb-1 flex items-center gap-2">
                 <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{r.name}</span>
                 <div className="flex gap-0.5 text-amber-400">
@@ -112,12 +115,17 @@ const PlanOption = ({
 }) => (
   <button
     onClick={onClick}
-    className="flex w-full items-center justify-between rounded-xl border-2 p-3.5 text-left transition-colors"
-    style={{
-      borderColor: selected ? BRAND : 'rgba(128,128,128,0.2)',
-      background: selected ? `${BRAND}0d` : undefined,
-    }}
+    className="relative flex w-full items-center justify-between rounded-2xl border-2 bg-white dark:bg-white/[0.04] p-4 text-left transition-colors"
+    style={{ borderColor: selected ? BRAND : 'rgba(128,128,128,0.18)' }}
   >
+    {badge && (
+      <span
+        className="absolute -top-2.5 right-4 rounded-full px-2 py-0.5 text-[10px] font-bold text-white"
+        style={{ background: BRAND }}
+      >
+        {badge}
+      </span>
+    )}
     <div className="flex items-center gap-3">
       <div
         className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2"
@@ -126,17 +134,10 @@ const PlanOption = ({
         {selected && <Check size={12} strokeWidth={3} className="text-white" />}
       </div>
       <div>
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{title}</span>
-          {badge && (
-            <span className="rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white" style={{ background: BRAND }}>
-              {badge}
-            </span>
-          )}
-        </div>
-        <span className="text-xs text-zinc-500 dark:text-zinc-400">{sub}</span>
+        <span className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100">{title}</span>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">{sub}</p>
       </div>
     </div>
-    <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{price}</span>
+    <span className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100">{price}</span>
   </button>
 )

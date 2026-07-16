@@ -3,13 +3,14 @@ import { useHabits } from './hooks/useHabits'
 import { useTheme } from './hooks/useTheme'
 import { useAuth } from './hooks/useAuth'
 import { Header } from './components/Header'
+import { WeekStrip } from './components/WeekStrip'
 import { HabitCard } from './components/HabitCard'
 import { EmptyState } from './components/EmptyState'
 import { TabBar, type Tab } from './components/TabBar'
 import { AddHabitSheet } from './components/AddHabitSheet'
 import { HabitDetail } from './components/HabitDetail'
 import { StatsView } from './components/StatsView'
-import { SettingsView } from './components/SettingsView'
+import { SettingsOverlay } from './components/SettingsOverlay'
 import { UpgradeModal } from './components/UpgradeModal'
 import { LoginScreen } from './components/LoginScreen'
 import { OnboardingFlow } from './components/onboarding/OnboardingFlow'
@@ -19,20 +20,22 @@ import { isScheduled } from './lib/streaks'
 import { today, toKey } from './lib/date'
 
 function App() {
-  const { habits, addHabit, updateHabit, deleteHabit, toggleToday } = useHabits()
+  const { habits, addHabit, updateHabit, deleteHabit, toggleDate } = useHabits()
   const { theme, setTheme } = useTheme()
   const { user, login, logout, completeOnboarding, setPlan } = useAuth()
 
   const [tab, setTab] = useState<Tab>('today')
+  const [selectedDate, setSelectedDate] = useState(() => today())
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editing, setEditing] = useState<Habit | null>(null)
   const [detailHabit, setDetailHabit] = useState<Habit | null>(null)
   const [burst, setBurst] = useState<Burst | null>(null)
   const [upgradeOpen, setUpgradeOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   const activeHabits = habits.filter((h) => !h.archived)
-  const scheduledToday = activeHabits.filter((h) => isScheduled(h, today()))
-  const restToday = activeHabits.filter((h) => !isScheduled(h, today()))
+  const scheduledForDay = activeHabits.filter((h) => isScheduled(h, selectedDate))
+  const restForDay = activeHabits.filter((h) => !isScheduled(h, selectedDate))
   const atFreeLimit = !!user && user.plan === 'free' && activeHabits.length >= FREE_HABIT_LIMIT
 
   if (!user) {
@@ -55,7 +58,8 @@ function App() {
   const handleToggle = (id: string, e: React.MouseEvent) => {
     const habit = habits.find((h) => h.id === id)
     if (!habit) return
-    const willBeDone = !habit.completions.includes(toKey(today()))
+    const dateKey = toKey(selectedDate)
+    const willBeDone = !habit.completions.includes(dateKey)
     if (willBeDone) {
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
       setBurst({
@@ -66,7 +70,7 @@ function App() {
       })
       setTimeout(() => setBurst(null), 650)
     }
-    toggleToday(id)
+    toggleDate(id, dateKey)
   }
 
   const openAdd = () => {
@@ -84,51 +88,44 @@ function App() {
     setSheetOpen(true)
   }
 
-  const titles: Record<Tab, string> = { today: 'Loop', stats: 'Stats', settings: 'Ajustes' }
+  const titles: Record<Tab, string> = { today: 'Loop', stats: 'Insights' }
 
   return (
-    <div className="mx-auto min-h-screen max-w-md bg-white dark:bg-zinc-950">
-      <Header habits={activeHabits} title={titles[tab]} />
+    <div className="mx-auto min-h-screen max-w-md bg-cream dark:bg-zinc-950">
+      <Header
+        title={titles[tab]}
+        plan={user.plan}
+        onOpenSettings={() => setSettingsOpen(true)}
+        onOpenUpgrade={() => setUpgradeOpen(true)}
+      />
 
-      {tab === 'today' &&
-        (activeHabits.length === 0 ? (
-          <EmptyState onAdd={openAdd} />
-        ) : (
-          <div className="space-y-2 px-4 pb-28">
-            {scheduledToday.map((h) => (
-              <HabitCard key={h.id} habit={h} onToggle={handleToggle} onOpen={setDetailHabit} />
-            ))}
-            {restToday.length > 0 && (
-              <>
-                <p className="pt-3 pb-1 text-xs font-medium uppercase tracking-wide text-zinc-400">
-                  Not scheduled today
-                </p>
-                {restToday.map((h) => (
-                  <HabitCard key={h.id} habit={h} onToggle={handleToggle} onOpen={setDetailHabit} />
-                ))}
-              </>
-            )}
-          </div>
-        ))}
+      {tab === 'today' && (
+        <>
+          <WeekStrip selected={selectedDate} onSelect={setSelectedDate} />
+          {activeHabits.length === 0 ? (
+            <EmptyState onAdd={openAdd} />
+          ) : (
+            <div className="mt-3 space-y-2 px-4 pb-28">
+              {scheduledForDay.map((h) => (
+                <HabitCard key={h.id} habit={h} date={selectedDate} onToggle={handleToggle} onOpen={setDetailHabit} />
+              ))}
+              {restForDay.length > 0 && (
+                <>
+                  <p className="pt-3 pb-1 text-xs font-medium uppercase tracking-wide text-zinc-400">
+                    No programado este día
+                  </p>
+                  {restForDay.map((h) => (
+                    <HabitCard key={h.id} habit={h} date={selectedDate} onToggle={handleToggle} onOpen={setDetailHabit} />
+                  ))}
+                </>
+              )}
+            </div>
+          )}
+        </>
+      )}
 
       {tab === 'stats' && (
         <StatsView habits={activeHabits} plan={user.plan} onOpen={setDetailHabit} onUpgrade={() => setUpgradeOpen(true)} />
-      )}
-
-      {tab === 'settings' && (
-        <SettingsView
-          user={user}
-          habitCount={activeHabits.length}
-          theme={theme}
-          onSetTheme={setTheme}
-          onUpgrade={() => setUpgradeOpen(true)}
-          onLogout={logout}
-          onResetData={() => {
-            if (confirm('¿Borrar todos los hábitos y empezar de nuevo?')) {
-              activeHabits.forEach((h) => deleteHabit(h.id))
-            }
-          }}
-        />
       )}
 
       <TabBar tab={tab} onChange={setTab} onAdd={openAdd} />
@@ -150,6 +147,22 @@ function App() {
         onClose={() => setDetailHabit(null)}
         onEdit={openEdit}
         onUpgrade={() => setUpgradeOpen(true)}
+      />
+
+      <SettingsOverlay
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        user={user}
+        habitCount={activeHabits.length}
+        theme={theme}
+        onSetTheme={setTheme}
+        onUpgrade={() => setUpgradeOpen(true)}
+        onLogout={logout}
+        onResetData={() => {
+          if (confirm('¿Borrar todos los hábitos y empezar de nuevo?')) {
+            activeHabits.forEach((h) => deleteHabit(h.id))
+          }
+        }}
       />
 
       <UpgradeModal

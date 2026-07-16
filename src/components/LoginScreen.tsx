@@ -16,60 +16,62 @@ export const LoginScreen = ({ onLogin }: Props) => {
   return (
     <div className="flex min-h-screen flex-col justify-center px-6 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]">
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: 0.45, ease: 'easeOut' }}
         className="mx-auto w-full max-w-sm"
       >
         <div
-          className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl"
-          style={{ background: BRAND }}
+          className="mx-auto mb-7 flex h-20 w-20 items-center justify-center rounded-[26px] shadow-xl"
+          style={{ background: BRAND, boxShadow: `0 16px 32px -12px ${BRAND}66` }}
         >
-          <Flame size={30} className="text-white" fill="white" />
+          <Flame size={36} className="text-white" fill="white" />
         </div>
-        <h1 className="text-center text-2xl font-bold text-zinc-900 dark:text-zinc-100">Loop</h1>
-        <p className="mt-1 text-center text-sm text-zinc-500 dark:text-zinc-400">
-          Construye hábitos que se quedan.
+        <h1 className="text-center text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">
+          Bienvenido a Loop
+        </h1>
+        <p className="mt-2 text-center text-[15px] text-zinc-500 dark:text-zinc-400">
+          Construye hábitos que de verdad se quedan.
         </p>
 
         <form
-          className="mt-8 space-y-3"
+          className="mt-9 space-y-3"
           onSubmit={(e) => {
             e.preventDefault()
             if (canSubmit) onLogin(name, email)
           }}
         >
-          <div className="flex items-center gap-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3">
+          <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-white/[0.06] px-4 py-3.5 shadow-sm">
             <User size={18} className="text-zinc-400" />
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Tu nombre"
-              className="w-full bg-transparent text-sm text-zinc-900 dark:text-zinc-100 outline-none placeholder:text-zinc-400"
+              className="w-full bg-transparent text-[15px] text-zinc-900 dark:text-zinc-100 outline-none placeholder:text-zinc-400"
             />
           </div>
-          <div className="flex items-center gap-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3">
+          <div className="flex items-center gap-3 rounded-2xl bg-white dark:bg-white/[0.06] px-4 py-3.5 shadow-sm">
             <Mail size={18} className="text-zinc-400" />
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@email.com"
-              className="w-full bg-transparent text-sm text-zinc-900 dark:text-zinc-100 outline-none placeholder:text-zinc-400"
+              className="w-full bg-transparent text-[15px] text-zinc-900 dark:text-zinc-100 outline-none placeholder:text-zinc-400"
             />
           </div>
 
           <button
             type="submit"
             disabled={!canSubmit}
-            className="w-full rounded-xl py-3 text-sm font-semibold text-white transition-opacity disabled:opacity-40"
+            className="w-full rounded-2xl py-3.5 text-[15px] font-semibold text-white shadow-lg transition-opacity disabled:opacity-40"
             style={{ background: BRAND }}
           >
             Continuar
           </button>
         </form>
 
-        <p className="mt-4 text-center text-xs text-zinc-400">
+        <p className="mt-5 text-center text-xs text-zinc-400">
           Tus datos se guardan solo en este dispositivo.
         </p>
       </motion.div>

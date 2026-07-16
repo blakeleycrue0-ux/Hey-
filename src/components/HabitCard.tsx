@@ -4,18 +4,19 @@ import type { Habit } from '../types'
 import { HABIT_COLORS } from '../types'
 import { HabitIcon } from '../lib/icons'
 import { currentStreak, isScheduled } from '../lib/streaks'
-import { today, toKey } from '../lib/date'
+import { toKey } from '../lib/date'
 
 interface Props {
   habit: Habit
+  date: Date
   onToggle: (id: string, e: React.MouseEvent) => void
   onOpen: (habit: Habit) => void
 }
 
-export const HabitCard = ({ habit, onToggle, onOpen }: Props) => {
+export const HabitCard = ({ habit, date, onToggle, onOpen }: Props) => {
   const color = HABIT_COLORS[habit.color]
-  const done = habit.completions.includes(toKey(today()))
-  const scheduled = isScheduled(habit, today())
+  const done = habit.completions.includes(toKey(date))
+  const scheduled = isScheduled(habit, date)
   const streak = currentStreak(habit)
 
   return (

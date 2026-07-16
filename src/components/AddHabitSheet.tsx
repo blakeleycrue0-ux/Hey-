@@ -19,14 +19,14 @@ interface Props {
 export const AddHabitSheet = ({ open, editing, onClose, onSave, onDelete }: Props) => {
   const [name, setName] = useState('')
   const [icon, setIcon] = useState<HabitIconKey>(ALL_ICONS[0])
-  const [color, setColor] = useState<HabitColor>('indigo')
+  const [color, setColor] = useState<HabitColor>('navy')
   const [days, setDays] = useState<number[]>([])
 
   useEffect(() => {
     if (open) {
       setName(editing?.name ?? '')
       setIcon(editing?.icon ?? ALL_ICONS[Math.floor(Math.random() * ALL_ICONS.length)])
-      setColor(editing?.color ?? 'indigo')
+      setColor(editing?.color ?? 'navy')
       setDays(editing?.days ?? [])
     }
   }, [open, editing])

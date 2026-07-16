@@ -26,7 +26,7 @@ export const HabitDetail = ({ habit, plan, onClose, onEdit, onUpgrade }: Props) 
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', stiffness: 340, damping: 34 }}
-          className="fixed inset-0 z-50 mx-auto max-w-md bg-zinc-50 dark:bg-zinc-950 overflow-y-auto"
+          className="fixed inset-0 z-50 mx-auto max-w-md bg-cream dark:bg-zinc-950 overflow-y-auto"
         >
           <div className="px-5 pt-[calc(1.25rem+env(safe-area-inset-top))] pb-8" style={{ background: color }}>
             <div className="flex items-center justify-between">
@@ -45,7 +45,7 @@ export const HabitDetail = ({ habit, plan, onClose, onEdit, onUpgrade }: Props) 
             </div>
           </div>
 
-          <div className="-mt-5 rounded-t-3xl bg-zinc-50 dark:bg-zinc-950 px-5 pt-5 pb-10">
+          <div className="-mt-5 rounded-t-3xl bg-cream dark:bg-zinc-950 px-5 pt-5 pb-10">
             <div className="grid grid-cols-3 gap-2">
               <StatTile icon={<Flame size={16} />} label="Streak" value={currentStreak(habit)} color={color} />
               <StatTile icon={<Trophy size={16} />} label="Best" value={longestStreak(habit)} color={color} />

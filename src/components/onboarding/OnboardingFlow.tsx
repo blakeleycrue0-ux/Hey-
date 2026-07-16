@@ -19,7 +19,7 @@ export const OnboardingFlow = ({ userName, onFinish }: Props) => {
   const [choice, setChoice] = useState<SuggestedHabit | null>(null)
   const [customName, setCustomName] = useState('')
   const [usingCustom, setUsingCustom] = useState(false)
-  const [color, setColor] = useState<HabitColor>('indigo')
+  const [color, setColor] = useState<HabitColor>('navy')
 
   const habitInput = (): NewHabitInput => ({
     name: usingCustom ? customName : (choice?.name ?? ''),
@@ -31,7 +31,7 @@ export const OnboardingFlow = ({ userName, onFinish }: Props) => {
   const canCreate = usingCustom ? customName.trim().length > 0 : choice !== null
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950">
+    <div className="min-h-screen bg-cream dark:bg-zinc-950">
       <AnimatePresence mode="wait">
         {step === 'welcome' && (
           <Frame key="welcome">

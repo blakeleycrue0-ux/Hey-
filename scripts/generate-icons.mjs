@@ -3,7 +3,7 @@ import { mkdirSync } from 'fs';
 
 mkdirSync('public/icons', { recursive: true });
 
-const BRAND = '#5B4FE8';
+const BRAND = '#1E2A44';
 
 // Flat, single-color mark: a simple flame (matches the in-app brand mark), no gradients.
 const flame = 'M256 118c-6 0-11 4-13 10-8 24-30 40-30 76 0 26 21 47 47 47s47-21 47-47c0-14-6-24-13-33 12 6 30 24 30 54 0 39-32 71-71 71s-71-32-71-71c0-56 41-84 61-96 6-4 9-8 13-11z';

@@ -17,7 +17,7 @@ export const UpgradeModal = ({ open, onClose, onSelect }: Props) => (
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', stiffness: 340, damping: 34 }}
-        className="fixed inset-0 z-50 mx-auto max-w-md overflow-y-auto bg-white dark:bg-zinc-950"
+        className="fixed inset-0 z-50 mx-auto max-w-md overflow-y-auto bg-cream dark:bg-zinc-950"
       >
         <button
           onClick={onClose}
