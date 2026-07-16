@@ -4,6 +4,8 @@
 
 @theme {
   --font-sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --color-cream: #F4F1EA;
+  --color-navy: #1E2A44;
 }
 
 :root {
@@ -16,9 +18,14 @@ html, body, #root {
 
 body {
   margin: 0;
+  background: #F4F1EA;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior-y: none;
+}
+
+.dark body {
+  background: #0b0d12;
 }
 
 * {

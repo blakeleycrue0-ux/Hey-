@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { Habit, HabitColor } from '../types'
+import type { Habit, HabitColor, HabitIconKey } from '../types'
 import { loadHabits, saveHabits, genId } from '../lib/storage'
-import { toKey, today } from '../lib/date'
 
 export interface NewHabitInput {
   name: string
-  icon: string
+  icon: HabitIconKey
   color: HabitColor
   days: number[]
 }
@@ -40,20 +39,6 @@ export const useHabits = () => {
     setHabits((prev) => prev.filter((h) => h.id !== id))
   }, [])
 
-  const toggleToday = useCallback((id: string) => {
-    const key = toKey(today())
-    setHabits((prev) =>
-      prev.map((h) => {
-        if (h.id !== id) return h
-        const done = h.completions.includes(key)
-        return {
-          ...h,
-          completions: done ? h.completions.filter((d) => d !== key) : [...h.completions, key],
-        }
-      }),
-    )
-  }, [])
-
   const toggleDate = useCallback((id: string, dateKey: string) => {
     setHabits((prev) =>
       prev.map((h) => {
@@ -67,5 +52,5 @@ export const useHabits = () => {
     )
   }, [])
 
-  return { habits, addHabit, updateHabit, deleteHabit, toggleToday, toggleDate }
+  return { habits, addHabit, updateHabit, deleteHabit, toggleDate }
 }

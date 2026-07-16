@@ -10,7 +10,7 @@ interface Props {
 }
 
 export const Heatmap = ({ habit, weeks = 18 }: Props) => {
-  const palette = HABIT_COLORS[habit.color]
+  const color = HABIT_COLORS[habit.color]
   const totalDays = weeks * 7
 
   const columns = useMemo(() => {
@@ -48,7 +48,7 @@ export const Heatmap = ({ habit, weeks = 18 }: Props) => {
                 background: !cell.inRange
                   ? 'transparent'
                   : cell.done
-                    ? `linear-gradient(135deg, ${palette.from}, ${palette.to})`
+                    ? color
                     : cell.scheduled
                       ? 'rgba(128,128,128,0.15)'
                       : 'rgba(128,128,128,0.06)',
