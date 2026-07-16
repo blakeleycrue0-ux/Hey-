@@ -72,6 +72,35 @@ export const completionRate = (habit: Habit, windowDays = 30): number => {
   return Math.round((done / scheduled) * 100)
 }
 
+/**
+ * Consecutive days where every habit scheduled that day was completed
+ * ("perfect days"). Days with nothing scheduled are skipped, not counted.
+ */
+export const perfectDayStreak = (habits: Habit[]): number => {
+  const active = habits.filter((h) => !h.archived)
+  if (active.length === 0) return 0
+
+  let cursor = 0
+  const todayScheduled = active.filter((h) => isScheduled(h, daysAgo(0)))
+  const todayAllDone = todayScheduled.length > 0 && todayScheduled.every((h) => isCompletedOn(h, daysAgo(0)))
+  if (todayScheduled.length > 0 && !todayAllDone) {
+    cursor = 1
+  }
+
+  let streak = 0
+  for (let i = 0; i < 365 * 3; i++) {
+    const date = daysAgo(cursor + i)
+    const scheduled = active.filter((h) => isScheduled(h, date))
+    if (scheduled.length === 0) continue
+    if (scheduled.every((h) => isCompletedOn(h, date))) {
+      streak++
+    } else {
+      break
+    }
+  }
+  return streak
+}
+
 const WEEKDAY_LABELS = ['D', 'L', 'M', 'X', 'J', 'V', 'S']
 
 export interface WeekdayStat {
