@@ -86,3 +86,15 @@ export const loadLastOfferShown = (): string | null => localStorage.getItem(OFFE
 export const saveLastOfferShown = (): void => {
   localStorage.setItem(OFFER_SHOWN_KEY, new Date().toISOString().slice(0, 10))
 }
+
+const OFFER_EXPIRY_KEY = 'loop.offerExpiry.v1'
+
+/** Epoch ms when the current intro-offer countdown runs out; the offer can't be claimed after this. */
+export const loadOfferExpiry = (): number | null => {
+  const raw = localStorage.getItem(OFFER_EXPIRY_KEY)
+  return raw ? Number(raw) : null
+}
+
+export const saveOfferExpiry = (expiresAt: number): void => {
+  localStorage.setItem(OFFER_EXPIRY_KEY, String(expiresAt))
+}

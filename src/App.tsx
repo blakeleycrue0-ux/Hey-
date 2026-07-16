@@ -29,7 +29,7 @@ import { Celebration, type Burst } from './components/Celebration'
 import { HABIT_COLORS, FREE_HABIT_LIMIT, type Habit } from './types'
 import { isScheduled, isCompletedOn } from './lib/streaks'
 import { today, toKey, daysFromNow } from './lib/date'
-import { loadLastOfferShown, saveLastOfferShown } from './lib/storage'
+import { loadLastOfferShown, saveLastOfferShown, loadOfferExpiry, saveOfferExpiry } from './lib/storage'
 
 function App() {
   const { habits, addHabit, updateHabit, deleteHabit, toggleDate, setArchived, replaceAll, setPausedUntil, setNote, setReminderTime } = useHabits()
@@ -54,12 +54,19 @@ function App() {
   const [routinesOpen, setRoutinesOpen] = useState(false)
   const [routineSheetOpen, setRoutineSheetOpen] = useState(false)
   const [editingRoutine, setEditingRoutine] = useState<Routine | null>(null)
+  const [offerExpiry, setOfferExpiry] = useState<number | null>(() => loadOfferExpiry())
 
   useEffect(() => {
     if (!user?.onboarded || user.plan !== 'free') return
     const todayKey = new Date().toISOString().slice(0, 10)
     if (loadLastOfferShown() === todayKey) return
     const timer = setTimeout(() => {
+      let expiry = loadOfferExpiry()
+      if (!expiry || expiry < Date.now()) {
+        expiry = Date.now() + 2 * 60 * 60 * 1000
+        saveOfferExpiry(expiry)
+      }
+      setOfferExpiry(expiry)
       setOfferPopupOpen(true)
       saveLastOfferShown()
     }, 5000)
@@ -298,6 +305,7 @@ function App() {
 
       <OfferPopup
         open={offerPopupOpen}
+        expiresAt={offerExpiry}
         onAccept={() => {
           setOfferPopupOpen(false)
           openUpgrade(true)
