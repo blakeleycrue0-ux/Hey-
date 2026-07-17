@@ -1,37 +1,35 @@
 import { useEffect, useRef } from 'react'
-import type { Habit } from '../types'
-import { isScheduled, isCompletedOn } from '../lib/streaks'
-import { today } from '../lib/date'
-import { notifyHabitReminder } from '../lib/notifications'
+import type { HEvent } from '../types'
+import { daysUntil } from '../lib/countdown'
+import { notifyEventReminder } from '../lib/notifications'
 
 /**
- * Fires a local Notification when the clock hits a habit's reminder time.
+ * Fires a local Notification once a day when an event enters its reminder window.
  * Only works while this tab/PWA is open and in memory — there is no
  * background push here, so on iOS Safari (which doesn't support closed-app
  * web push) this is best-effort, not a guaranteed alarm.
  */
-export const useReminders = (habits: Habit[]) => {
-  const firedToday = useRef<Set<string>>(new Set())
+export const useReminders = (events: HEvent[]) => {
+  const fired = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     const check = () => {
-      const now = new Date()
-      const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-      const dayKey = now.toDateString()
+      const dayKey = new Date().toDateString()
 
-      habits.forEach((h) => {
-        if (h.archived || !h.reminderTime) return
-        if (!isScheduled(h, today()) || isCompletedOn(h, today())) return
-        const fireKey = `${h.id}-${dayKey}-${h.reminderTime}`
-        if (h.reminderTime === hhmm && !firedToday.current.has(fireKey)) {
-          firedToday.current.add(fireKey)
-          notifyHabitReminder(h.name)
+      events.forEach((e) => {
+        if (e.archived || e.reminderDaysBefore === undefined) return
+        const left = daysUntil(e)
+        if (left < 0 || left > e.reminderDaysBefore) return
+        const fireKey = `${e.id}-${dayKey}`
+        if (!fired.current.has(fireKey)) {
+          fired.current.add(fireKey)
+          notifyEventReminder(e.name, left)
         }
       })
     }
 
     check()
-    const interval = setInterval(check, 30_000)
+    const interval = setInterval(check, 60_000)
     return () => clearInterval(interval)
-  }, [habits])
+  }, [events])
 }

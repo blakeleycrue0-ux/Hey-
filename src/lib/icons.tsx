@@ -1,22 +1,18 @@
 import {
-  Droplet, Moon, BookOpen, Dumbbell, PenLine, Heart, Pill, Sun,
-  Footprints, Brain, GraduationCap, Wallet, Ban, Coffee, Smartphone,
-  Wine, Cigarette, Candy, Salad, Bed, Timer, Target, Smile,
-  Sparkles, Music, Palette, Users, Home, Leaf, Bike, PiggyBank,
-  TrendingUp, Calendar, Flame,
+  Cake, Plane, GraduationCap, Heart, Gift, PartyPopper, Briefcase,
+  Home, Baby, Gem, Trophy, Sun, Snowflake, Calendar, Star,
+  Flag, Car, FileText, Clock, MapPin, Stethoscope, Music, Users, Sparkles,
   type LucideIcon,
 } from 'lucide-react'
-import type { HabitIconKey } from '../types'
+import type { EventIconKey } from '../types'
 
-export const ICONS: Record<HabitIconKey, LucideIcon> = {
-  Droplet, Moon, BookOpen, Dumbbell, PenLine, Heart, Pill, Sun,
-  Footprints, Brain, GraduationCap, Wallet, Ban, Coffee, Smartphone,
-  Wine, Cigarette, Candy, Salad, Bed, Timer, Target, Smile,
-  Sparkles, Music, Palette, Users, Home, Leaf, Bike, PiggyBank,
-  TrendingUp, Calendar, Flame,
+export const ICONS: Record<EventIconKey, LucideIcon> = {
+  Cake, Plane, GraduationCap, Heart, Gift, PartyPopper, Briefcase,
+  Home, Baby, Gem, Trophy, Sun, Snowflake, Calendar, Star,
+  Flag, Car, FileText, Clock, MapPin, Stethoscope, Music, Users, Sparkles,
 }
 
-export const HabitIcon = ({ name, size = 20, className }: { name: HabitIconKey; size?: number; className?: string }) => {
+export const EventIcon = ({ name, size = 20, className }: { name: EventIconKey; size?: number; className?: string }) => {
   const Icon = ICONS[name] ?? Sparkles
   return <Icon size={size} className={className} />
 }

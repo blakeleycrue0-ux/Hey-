@@ -1,13 +1,13 @@
-import type { Habit } from '../types'
+import type { HEvent } from '../types'
 
 interface BackupFile {
   version: 1
   exportedAt: string
-  habits: Habit[]
+  events: HEvent[]
 }
 
-export const exportBackup = (habits: Habit[]): void => {
-  const data: BackupFile = { version: 1, exportedAt: new Date().toISOString(), habits }
+export const exportBackup = (events: HEvent[]): void => {
+  const data: BackupFile = { version: 1, exportedAt: new Date().toISOString(), events }
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -17,9 +17,9 @@ export const exportBackup = (habits: Habit[]): void => {
   URL.revokeObjectURL(url)
 }
 
-export const importBackup = (file: File): Promise<Habit[]> =>
+export const importBackup = (file: File): Promise<HEvent[]> =>
   file.text().then((text) => {
     const data = JSON.parse(text) as Partial<BackupFile>
-    if (!Array.isArray(data.habits)) throw new Error('Archivo de copia de seguridad no válido')
-    return data.habits
+    if (!Array.isArray(data.events)) throw new Error('Archivo de copia de seguridad no válido')
+    return data.events
   })

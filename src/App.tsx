@@ -1,49 +1,41 @@
 import { useEffect, useState } from 'react'
-import { useHabits } from './hooks/useHabits'
+import { useEvents } from './hooks/useEvents'
 import { useTheme } from './hooks/useTheme'
 import { useAuth } from './hooks/useAuth'
 import { usePrefs } from './hooks/usePrefs'
-import { useRoutines, type Routine } from './hooks/useRoutines'
 import { useReminders } from './hooks/useReminders'
 import { Header } from './components/Header'
-import { WeekStrip } from './components/WeekStrip'
-import { TodayHero } from './components/TodayHero'
+import { EventHero } from './components/EventHero'
 import { DailyTipCard } from './components/DailyTipCard'
-import { HabitCard } from './components/HabitCard'
+import { EventCard } from './components/EventCard'
 import { EmptyState } from './components/EmptyState'
 import { TabBar, type Tab } from './components/TabBar'
-import { AddHabitSheet } from './components/AddHabitSheet'
-import { HabitDetail } from './components/HabitDetail'
+import { AddEventSheet } from './components/AddEventSheet'
+import { EventDetail } from './components/EventDetail'
 import { StatsView } from './components/StatsView'
 import { SettingsOverlay } from './components/SettingsOverlay'
-import { ArchivedHabitsOverlay } from './components/ArchivedHabitsOverlay'
+import { ArchivedEventsOverlay } from './components/ArchivedEventsOverlay'
 import { AchievementsOverlay } from './components/AchievementsOverlay'
-import { RoutineChips } from './components/RoutineChips'
-import { RoutinesOverlay } from './components/RoutinesOverlay'
-import { RoutineSheet } from './components/RoutineSheet'
 import { UpgradeModal } from './components/UpgradeModal'
 import { OfferPopup } from './components/OfferPopup'
 import { LoginScreen } from './components/LoginScreen'
 import { OnboardingFlow } from './components/onboarding/OnboardingFlow'
 import { Celebration, type Burst } from './components/Celebration'
-import { HABIT_COLORS, FREE_HABIT_LIMIT, type Habit } from './types'
-import { isScheduled, isCompletedOn } from './lib/streaks'
-import { today, toKey, daysFromNow } from './lib/date'
+import { FREE_EVENT_LIMIT, type HEvent } from './types'
+import { daysUntil } from './lib/countdown'
 import { loadLastOfferShown, saveLastOfferShown, loadOfferExpiry, saveOfferExpiry } from './lib/storage'
 
 function App() {
-  const { habits, addHabit, updateHabit, deleteHabit, toggleDate, setArchived, replaceAll, setPausedUntil, setNote, setReminderTime } = useHabits()
-  const { routines, addRoutine, updateRoutine, deleteRoutine } = useRoutines()
+  const { events, addEvent, updateEvent, deleteEvent, setArchived, replaceAll, setReminderDaysBefore } = useEvents()
   const { prefs, updatePrefs } = usePrefs()
-  useReminders(habits)
+  useReminders(events)
   const { theme, setTheme } = useTheme(prefs.darkByTime)
   const { user, loading, loginWithGoogle, logout, completeOnboarding, setPlan } = useAuth()
 
   const [tab, setTab] = useState<Tab>('today')
-  const [selectedDate, setSelectedDate] = useState(() => today())
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [detailHabitId, setDetailHabitId] = useState<string | null>(null)
+  const [detailEventId, setDetailEventId] = useState<string | null>(null)
   const [burst, setBurst] = useState<Burst | null>(null)
   const [upgradeOpen, setUpgradeOpen] = useState(false)
   const [upgradeOffer, setUpgradeOffer] = useState(false)
@@ -51,9 +43,6 @@ function App() {
   const [archivedOpen, setArchivedOpen] = useState(false)
   const [achievementsOpen, setAchievementsOpen] = useState(false)
   const [offerPopupOpen, setOfferPopupOpen] = useState(false)
-  const [routinesOpen, setRoutinesOpen] = useState(false)
-  const [routineSheetOpen, setRoutineSheetOpen] = useState(false)
-  const [editingRoutine, setEditingRoutine] = useState<Routine | null>(null)
   const [offerExpiry, setOfferExpiry] = useState<number | null>(() => loadOfferExpiry())
 
   useEffect(() => {
@@ -78,21 +67,16 @@ function App() {
     setUpgradeOpen(true)
   }
 
-  const activeHabits = habits.filter((h) => !h.archived)
-  const archivedHabits = habits.filter((h) => h.archived)
-  const editing = habits.find((h) => h.id === editingId) ?? null
-  const detailHabit = habits.find((h) => h.id === detailHabitId) ?? null
-  let scheduledForDay = activeHabits.filter((h) => isScheduled(h, selectedDate))
-  const restForDay = activeHabits.filter((h) => !isScheduled(h, selectedDate))
-  const atFreeLimit = !!user && user.plan === 'free' && activeHabits.length >= FREE_HABIT_LIMIT
+  const activeEvents = events.filter((e) => !e.archived)
+  const archivedEvents = events.filter((e) => e.archived)
+  const editing = events.find((e) => e.id === editingId) ?? null
+  const detailEvent = events.find((e) => e.id === detailEventId) ?? null
+  const atFreeLimit = !!user && user.plan === 'free' && activeEvents.length >= FREE_EVENT_LIMIT
 
-  if (prefs.autoSortDone) {
-    scheduledForDay = [...scheduledForDay].sort((a, b) => {
-      const aDone = isCompletedOn(a, selectedDate) ? 1 : 0
-      const bDone = isCompletedOn(b, selectedDate) ? 1 : 0
-      return aDone - bDone
-    })
-  }
+  const upcoming = [...activeEvents].filter((e) => daysUntil(e) >= 0).sort((a, b) => daysUntil(a) - daysUntil(b))
+  const past = [...activeEvents].filter((e) => daysUntil(e) < 0).sort((a, b) => daysUntil(b) - daysUntil(a))
+  const nearest = upcoming[0] ?? null
+  const restUpcoming = nearest ? upcoming.slice(1) : upcoming
 
   if (loading) {
     return <div className="min-h-screen bg-cream dark:bg-zinc-950" />
@@ -106,39 +90,13 @@ function App() {
     return (
       <OnboardingFlow
         userName={user.name}
-        onFinish={(habitInput, plan) => {
-          addHabit(habitInput)
+        onFinish={(eventInput, plan) => {
+          addEvent(eventInput)
           setPlan(plan)
           completeOnboarding()
         }}
       />
     )
-  }
-
-  const handleToggle = (id: string, e: React.MouseEvent) => {
-    const habit = habits.find((h) => h.id === id)
-    if (!habit) return
-    const dateKey = toKey(selectedDate)
-    const willBeDone = !habit.completions.includes(dateKey)
-    if (willBeDone) {
-      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-      setBurst({
-        id: `${id}-${Date.now()}`,
-        x: rect.left + rect.width / 2,
-        y: rect.top + rect.height / 2,
-        color: HABIT_COLORS[habit.color],
-      })
-      setTimeout(() => setBurst(null), 650)
-    }
-    toggleDate(id, dateKey)
-  }
-
-  const handleCompleteRoutine = (habitIds: string[]) => {
-    const dateKey = toKey(selectedDate)
-    habitIds.forEach((id) => {
-      const habit = habits.find((h) => h.id === id)
-      if (habit && !habit.completions.includes(dateKey)) toggleDate(id, dateKey)
-    })
   }
 
   const openAdd = () => {
@@ -150,13 +108,13 @@ function App() {
     setSheetOpen(true)
   }
 
-  const openEdit = (habit: Habit) => {
-    setEditingId(habit.id)
-    setDetailHabitId(null)
+  const openEdit = (event: HEvent) => {
+    setEditingId(event.id)
+    setDetailEventId(null)
     setSheetOpen(true)
   }
 
-  const titles: Record<Tab, string> = { today: 'Loop', stats: 'Insights' }
+  const titles: Record<Tab, string> = { today: 'Loop', stats: 'Resumen' }
 
   return (
     <div className="mx-auto min-h-screen max-w-md bg-cream dark:bg-zinc-950">
@@ -169,24 +127,22 @@ function App() {
 
       {tab === 'today' && (
         <>
-          <WeekStrip selected={selectedDate} onSelect={setSelectedDate} weekStartsOn={prefs.weekStartsOn} />
-          <TodayHero habits={habits} />
+          {nearest && <EventHero event={nearest} onOpen={(e) => setDetailEventId(e.id)} />}
           <DailyTipCard />
-          <RoutineChips routines={routines} habits={activeHabits} date={selectedDate} onComplete={handleCompleteRoutine} />
-          {activeHabits.length === 0 ? (
+          {activeEvents.length === 0 ? (
             <EmptyState onAdd={openAdd} />
           ) : (
             <div className="space-y-2 px-4 pb-28">
-              {scheduledForDay.map((h) => (
-                <HabitCard key={h.id} habit={h} date={selectedDate} onToggle={handleToggle} onOpen={(h) => setDetailHabitId(h.id)} />
+              {restUpcoming.map((e) => (
+                <EventCard key={e.id} event={e} onOpen={(ev) => setDetailEventId(ev.id)} />
               ))}
-              {restForDay.length > 0 && (
+              {past.length > 0 && (
                 <>
                   <p className="pt-3 pb-1 text-xs font-medium uppercase tracking-wide text-zinc-400">
-                    No programado este día
+                    Ya pasaron
                   </p>
-                  {restForDay.map((h) => (
-                    <HabitCard key={h.id} habit={h} date={selectedDate} onToggle={handleToggle} onOpen={(h) => setDetailHabitId(h.id)} />
+                  {past.map((e) => (
+                    <EventCard key={e.id} event={e} onOpen={(ev) => setDetailEventId(ev.id)} />
                   ))}
                 </>
               )}
@@ -196,45 +152,38 @@ function App() {
       )}
 
       {tab === 'stats' && (
-        <StatsView habits={activeHabits} plan={user.plan} onOpen={(h) => setDetailHabitId(h.id)} onUpgrade={() => openUpgrade()} />
+        <StatsView events={activeEvents} plan={user.plan} onOpen={(e) => setDetailEventId(e.id)} onUpgrade={() => openUpgrade()} />
       )}
 
       <TabBar tab={tab} onChange={setTab} onAdd={openAdd} />
 
-      <AddHabitSheet
+      <AddEventSheet
         open={sheetOpen}
         editing={editing}
         onClose={() => setSheetOpen(false)}
-        onSave={(input, reminderTime) => {
+        onSave={(input, reminderDaysBefore) => {
           if (editing) {
-            updateHabit(editing.id, input)
-            setReminderTime(editing.id, reminderTime)
+            updateEvent(editing.id, input)
+            setReminderDaysBefore(editing.id, reminderDaysBefore)
           } else {
-            const created = addHabit(input)
-            setReminderTime(created.id, reminderTime)
+            const created = addEvent(input)
+            setReminderDaysBefore(created.id, reminderDaysBefore)
+            setBurst({ id: `add-${Date.now()}`, x: window.innerWidth / 2, y: window.innerHeight - 90, color: '#111111' })
+            setTimeout(() => setBurst(null), 650)
           }
         }}
-        onDelete={deleteHabit}
+        onDelete={deleteEvent}
         onArchive={(id) => setArchived(id, true)}
       />
 
-      <HabitDetail
-        habit={detailHabit}
-        plan={user.plan}
-        onClose={() => setDetailHabitId(null)}
-        onEdit={openEdit}
-        onUpgrade={() => openUpgrade()}
-        onPause={(id, days) => setPausedUntil(id, toKey(daysFromNow(days)))}
-        onResume={(id) => setPausedUntil(id, undefined)}
-        onSaveNote={setNote}
-      />
+      <EventDetail event={detailEvent} onClose={() => setDetailEventId(null)} onEdit={openEdit} />
 
       <SettingsOverlay
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
         user={user}
-        habits={habits}
-        archivedCount={archivedHabits.length}
+        events={events}
+        archivedCount={archivedEvents.length}
         theme={theme}
         onSetTheme={setTheme}
         prefs={prefs}
@@ -242,56 +191,28 @@ function App() {
         onUpgrade={() => openUpgrade()}
         onLogout={logout}
         onResetData={() => {
-          if (confirm('¿Borrar todos los hábitos y empezar de nuevo?')) {
+          if (confirm('¿Borrar todos los eventos y empezar de nuevo?')) {
             replaceAll([])
           }
         }}
         onOpenArchived={() => setArchivedOpen(true)}
         onOpenAchievements={() => setAchievementsOpen(true)}
-        onOpenRoutines={() => setRoutinesOpen(true)}
-        onImportHabits={(imported) => {
-          if (confirm(`¿Importar ${imported.length} hábito(s)? Esto reemplaza tus hábitos actuales.`)) {
+        onImportEvents={(imported) => {
+          if (confirm(`¿Importar ${imported.length} evento(s)? Esto reemplaza tus eventos actuales.`)) {
             replaceAll(imported)
           }
         }}
       />
 
-      <ArchivedHabitsOverlay
+      <ArchivedEventsOverlay
         open={archivedOpen}
-        habits={archivedHabits}
+        events={archivedEvents}
         onClose={() => setArchivedOpen(false)}
         onRestore={(id) => setArchived(id, false)}
-        onDelete={deleteHabit}
+        onDelete={deleteEvent}
       />
 
-      <AchievementsOverlay open={achievementsOpen} habits={habits} onClose={() => setAchievementsOpen(false)} />
-
-      <RoutinesOverlay
-        open={routinesOpen}
-        routines={routines}
-        habits={activeHabits}
-        onClose={() => setRoutinesOpen(false)}
-        onAdd={() => {
-          setEditingRoutine(null)
-          setRoutineSheetOpen(true)
-        }}
-        onEdit={(r) => {
-          setEditingRoutine(r)
-          setRoutineSheetOpen(true)
-        }}
-      />
-
-      <RoutineSheet
-        open={routineSheetOpen}
-        editing={editingRoutine}
-        habits={activeHabits}
-        onClose={() => setRoutineSheetOpen(false)}
-        onSave={(input) => {
-          if (editingRoutine) updateRoutine(editingRoutine.id, input)
-          else addRoutine(input)
-        }}
-        onDelete={deleteRoutine}
-      />
+      <AchievementsOverlay open={achievementsOpen} events={events} onClose={() => setAchievementsOpen(false)} />
 
       <UpgradeModal
         open={upgradeOpen}

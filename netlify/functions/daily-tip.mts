@@ -1,7 +1,8 @@
 import type { Context } from '@netlify/functions'
 
 const PROMPT =
-  'Da un consejo corto (máximo 2 frases, sin comillas ni prefijos) sobre hábitos, constancia o motivación diaria. ' +
+  'Da un consejo o reflexión corta (máximo 2 frases, sin comillas ni prefijos) sobre la espera, la ilusión por lo que viene, ' +
+  'aprovechar el tiempo o no perder de vista las fechas importantes. ' +
   'Tono cercano y positivo, en español, sin emojis. Varíalo cada vez, no repitas frases genéricas típicas.'
 
 export default async (req: Request, _context: Context) => {

@@ -11,15 +11,15 @@ interface Props {
 }
 
 const REVIEWS = [
-  { name: 'Marta', text: 'Llevo 45 días seguidos, nunca había sido tan constante.' },
-  { name: 'Diego', text: 'El mejor tracker de hábitos que he probado, y eso que he probado muchos.' },
-  { name: 'Laura', text: 'Simple y bonito, exactamente lo que necesitaba para empezar.' },
+  { name: 'Marta', text: 'Ya no se me olvida ningún cumpleaños, la app me avisa siempre.' },
+  { name: 'Diego', text: 'La cuenta atrás para mi viaje me tiene enganchado, es una pasada.' },
+  { name: 'Laura', text: 'Perfecta para no perder de vista mis exámenes y entregas.' },
 ]
 
 const PERKS = [
-  { icon: InfinityIcon, title: 'Hábitos ilimitados', text: 'Sin límite en cuántos hábitos puedes seguir' },
-  { icon: BarChart3, title: 'Insights avanzados', text: 'Ve exactamente qué días te funcionan mejor' },
-  { icon: Palette, title: 'Colores e iconos extra', text: 'Personaliza cada hábito a tu manera' },
+  { icon: InfinityIcon, title: 'Eventos ilimitados', text: 'Sin límite en cuántas cuentas atrás puedes seguir' },
+  { icon: BarChart3, title: 'Insights avanzados', text: 'Ve qué tipo de fechas sigues más' },
+  { icon: Palette, title: 'Colores e iconos extra', text: 'Personaliza cada cuenta atrás a tu manera' },
 ]
 
 export const PaywallScreen = ({ onSelect, onSkip, offer }: Props) => {
@@ -37,7 +37,7 @@ export const PaywallScreen = ({ onSelect, onSkip, offer }: Props) => {
 
         <LogoMark size={64} className="mx-auto mb-5" />
         <h1 className="text-center text-[26px] font-extrabold leading-tight tracking-tight text-zinc-900 dark:text-zinc-100">
-          Construye hábitos que de verdad se quedan
+          No dejes que se te pase nada importante
         </h1>
 
         <div className="mt-7 space-y-4">

@@ -1,4 +1,4 @@
-import { BarChart3, ListChecks, Plus } from 'lucide-react'
+import { Hourglass, PieChart, Plus } from 'lucide-react'
 import { BRAND } from '../types'
 
 export type Tab = 'today' | 'stats'
@@ -17,15 +17,15 @@ export const TabBar = ({ tab, onChange, onAdd }: Props) => (
         className="flex flex-col items-center gap-0.5 text-xs font-medium"
         style={{ color: tab === 'today' ? BRAND : undefined }}
       >
-        <ListChecks size={20} className={tab === 'today' ? '' : 'text-zinc-400'} />
-        <span className={tab === 'today' ? '' : 'text-zinc-400'}>Hoy</span>
+        <Hourglass size={20} className={tab === 'today' ? '' : 'text-zinc-400'} />
+        <span className={tab === 'today' ? '' : 'text-zinc-400'}>Inicio</span>
       </button>
 
       <button
         onClick={onAdd}
         className="-mt-8 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg"
         style={{ background: BRAND }}
-        aria-label="Add habit"
+        aria-label="Añadir evento"
       >
         <Plus size={26} strokeWidth={2.5} />
       </button>
@@ -35,8 +35,8 @@ export const TabBar = ({ tab, onChange, onAdd }: Props) => (
         className="flex flex-col items-center gap-0.5 text-xs font-medium"
         style={{ color: tab === 'stats' ? BRAND : undefined }}
       >
-        <BarChart3 size={20} className={tab === 'stats' ? '' : 'text-zinc-400'} />
-        <span className={tab === 'stats' ? '' : 'text-zinc-400'}>Stats</span>
+        <PieChart size={20} className={tab === 'stats' ? '' : 'text-zinc-400'} />
+        <span className={tab === 'stats' ? '' : 'text-zinc-400'}>Resumen</span>
       </button>
     </div>
   </div>

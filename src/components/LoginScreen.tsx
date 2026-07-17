@@ -27,7 +27,7 @@ export const LoginScreen = ({ onLogin }: Props) => (
         Bienvenido a Loop
       </h1>
       <p className="mt-2 text-center text-[15px] text-zinc-500 dark:text-zinc-400">
-        Construye hábitos que de verdad se quedan.
+        Cuenta atrás para lo que de verdad importa.
       </p>
 
       <button
@@ -39,7 +39,7 @@ export const LoginScreen = ({ onLogin }: Props) => (
       </button>
 
       <p className="mt-5 text-center text-xs text-zinc-400">
-        Tu cuenta y tus hábitos se guardan de forma segura.
+        Tu cuenta y tus eventos se guardan de forma segura.
       </p>
     </motion.div>
   </div>

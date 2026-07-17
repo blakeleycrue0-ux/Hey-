@@ -1,14 +1,14 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft } from 'lucide-react'
 import { SettingsView } from './SettingsView'
-import type { Habit } from '../types'
+import type { HEvent } from '../types'
 import type { Prefs, Theme } from '../lib/storage'
 import type { AuthedUser } from '../hooks/useAuth'
 
 interface Props {
   open: boolean
   user: AuthedUser
-  habits: Habit[]
+  events: HEvent[]
   archivedCount: number
   theme: Theme
   onSetTheme: (t: Theme) => void
@@ -20,8 +20,7 @@ interface Props {
   onResetData: () => void
   onOpenArchived: () => void
   onOpenAchievements: () => void
-  onOpenRoutines: () => void
-  onImportHabits: (habits: Habit[]) => void
+  onImportEvents: (events: HEvent[]) => void
 }
 
 export const SettingsOverlay = ({ open, onClose, ...rest }: Props) => (
