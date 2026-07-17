@@ -6,7 +6,8 @@ export const requestNotificationPermission = async (): Promise<NotificationPermi
   return Notification.requestPermission()
 }
 
-export const notifyHabitReminder = (habitName: string): void => {
+export const notifyEventReminder = (eventName: string, daysLeft: number): void => {
   if (!notificationsSupported() || Notification.permission !== 'granted') return
-  new Notification('Loop', { body: `Toca para recordar: ${habitName}`, tag: `loop-${habitName}` })
+  const body = daysLeft === 0 ? `${eventName} es hoy` : daysLeft === 1 ? `${eventName} es mañana` : `Quedan ${daysLeft} días para ${eventName}`
+  new Notification('Loop', { body, tag: `loop-${eventName}` })
 }

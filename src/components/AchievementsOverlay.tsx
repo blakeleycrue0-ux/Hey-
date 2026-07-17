@@ -1,16 +1,16 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, Lock, Trophy } from 'lucide-react'
-import { BRAND, type Habit } from '../types'
+import { BRAND, type HEvent } from '../types'
 import { computeAchievements } from '../lib/achievements'
 
 interface Props {
   open: boolean
-  habits: Habit[]
+  events: HEvent[]
   onClose: () => void
 }
 
-export const AchievementsOverlay = ({ open, habits, onClose }: Props) => {
-  const achievements = computeAchievements(habits)
+export const AchievementsOverlay = ({ open, events, onClose }: Props) => {
+  const achievements = computeAchievements(events)
   const unlockedCount = achievements.filter((a) => a.unlocked).length
 
   return (

@@ -1,110 +1,60 @@
-import { Flame, Trophy, Target, Layers, Lock, Sparkles, TrendingDown, TrendingUp, Minus } from 'lucide-react'
-import type { Habit, Plan } from '../types'
-import { HABIT_COLORS, BRAND } from '../types'
-import { HabitIcon } from '../lib/icons'
-import { currentStreak, longestStreak, completionRate, weekdayStats, weekCompletionRate } from '../lib/streaks'
-import { Heatmap } from './Heatmap'
+import { CalendarClock, Hourglass, Layers, Lock, Sparkles } from 'lucide-react'
+import type { HEvent, Plan } from '../types'
+import { BRAND } from '../types'
+import { daysUntil } from '../lib/countdown'
+import { EventIcon } from '../lib/icons'
+import { EventCard } from './EventCard'
 
 interface Props {
-  habits: Habit[]
+  events: HEvent[]
   plan: Plan
-  onOpen: (habit: Habit) => void
+  onOpen: (event: HEvent) => void
   onUpgrade: () => void
 }
 
-export const StatsView = ({ habits, plan, onOpen, onUpgrade }: Props) => {
-  const activeStreaks = habits.reduce((sum, h) => sum + (currentStreak(h) > 0 ? 1 : 0), 0)
-  const bestEver = habits.reduce((best, h) => Math.max(best, longestStreak(h)), 0)
-  const avgRate = habits.length
-    ? Math.round(habits.reduce((sum, h) => sum + completionRate(h), 0) / habits.length)
-    : 0
+export const StatsView = ({ events, plan, onOpen, onUpgrade }: Props) => {
+  const upcoming = events.filter((e) => daysUntil(e) >= 0)
+  const closest = upcoming.length ? Math.min(...upcoming.map((e) => daysUntil(e))) : 0
+  const farthest = upcoming.length ? Math.max(...upcoming.map((e) => daysUntil(e))) : 0
+  const sorted = [...events].sort((a, b) => daysUntil(a) - daysUntil(b))
 
   return (
     <div className="px-4 pt-2 pb-24">
       <div className="grid grid-cols-3 gap-2">
-        <SummaryTile icon={<Flame size={16} />} label="Active streaks" value={activeStreaks} />
-        <SummaryTile icon={<Trophy size={16} />} label="Best streak" value={bestEver} />
-        <SummaryTile icon={<Target size={16} />} label="Avg. rate" value={`${avgRate}%`} />
+        <SummaryTile icon={<Layers size={16} />} label="Activos" value={events.length} />
+        <SummaryTile icon={<Hourglass size={16} />} label="Más cercano" value={upcoming.length ? closest : '—'} />
+        <SummaryTile icon={<CalendarClock size={16} />} label="Más lejano" value={upcoming.length ? farthest : '—'} />
       </div>
 
-      {habits.length > 0 && <WeekCompare habits={habits} />}
-      {habits.length > 0 && <OverallInsights habits={habits} plan={plan} onUpgrade={onUpgrade} />}
+      {events.length > 0 && <CategoryInsight events={events} plan={plan} onUpgrade={onUpgrade} />}
 
-      {habits.length === 0 ? (
+      {events.length === 0 ? (
         <div className="mt-16 flex flex-col items-center text-center text-zinc-400">
           <Layers size={32} className="mb-2 opacity-40" />
-          <p className="text-sm">Add a habit to see your stats here.</p>
+          <p className="text-sm">Añade un evento para ver tu resumen aquí.</p>
         </div>
       ) : (
-        <div className="mt-5 space-y-3">
-          {habits.map((h) => {
-            const color = HABIT_COLORS[h.color]
-            return (
-              <button
-                key={h.id}
-                onClick={() => onOpen(h)}
-                className="w-full rounded-2xl bg-white dark:bg-white/[0.04] border border-black/5 dark:border-white/[0.06] p-4 text-left"
-              >
-                <div className="mb-3 flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg text-white" style={{ background: color }}>
-                    <HabitIcon name={h.icon} size={16} />
-                  </div>
-                  <p className="font-medium text-zinc-900 dark:text-zinc-100">{h.name}</p>
-                  <span className="ml-auto flex items-center gap-1 text-xs font-medium" style={{ color }}>
-                    <Flame size={12} />
-                    {currentStreak(h)}
-                  </span>
-                </div>
-                <Heatmap habit={h} weeks={14} />
-              </button>
-            )
-          })}
+        <div className="mt-5 space-y-2">
+          {sorted.map((e) => (
+            <EventCard key={e.id} event={e} onOpen={onOpen} />
+          ))}
         </div>
       )}
     </div>
   )
 }
 
-const WeekCompare = ({ habits }: { habits: Habit[] }) => {
-  const thisWeek = weekCompletionRate(habits, 0)
-  const lastWeek = weekCompletionRate(habits, 1)
-  const diff = thisWeek - lastWeek
-  const Icon = diff > 0 ? TrendingUp : diff < 0 ? TrendingDown : Minus
-  const tone = diff > 0 ? '#059669' : diff < 0 ? '#e11d48' : '#9ca3af'
-
-  return (
-    <div className="mt-4 flex items-center gap-3 rounded-2xl bg-white dark:bg-white/[0.04] border border-black/5 dark:border-white/[0.06] p-4">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{ background: `${tone}1a`, color: tone }}>
-        <Icon size={18} />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{thisWeek}% esta semana</p>
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          {diff === 0 ? 'Igual que' : diff > 0 ? `${diff} pts más que` : `${Math.abs(diff)} pts menos que`} la semana pasada ({lastWeek}%)
-        </p>
-      </div>
-    </div>
-  )
-}
-
-const OverallInsights = ({ habits, plan, onUpgrade }: { habits: Habit[]; plan: Plan; onUpgrade: () => void }) => {
+const CategoryInsight = ({ events, plan, onUpgrade }: { events: HEvent[]; plan: Plan; onUpgrade: () => void }) => {
   const isPro = plan !== 'free'
-  const combined = [0, 0, 0, 0, 0, 0, 0]
-  const counts = [0, 0, 0, 0, 0, 0, 0]
-  habits.forEach((h) => {
-    weekdayStats(h).forEach((s, i) => {
-      combined[i] += s.rate
-      counts[i]++
-    })
-  })
-  const avgByDay = combined.map((v, i) => (counts[i] ? Math.round(v / counts[i]) : 0))
-  const bestDayIdx = avgByDay.indexOf(Math.max(...avgByDay))
-  const dayNames = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
+  const counts = new Map<string, number>()
+  events.forEach((e) => counts.set(e.icon, (counts.get(e.icon) ?? 0) + 1))
+  const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5)
+  const max = Math.max(1, ...top.map(([, c]) => c))
 
   return (
     <div className="relative mt-4 rounded-2xl bg-white dark:bg-white/[0.04] border border-black/5 dark:border-white/[0.06] p-4 overflow-hidden">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Tu semana</p>
+        <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Qué sigues más</p>
         {!isPro && (
           <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold text-white" style={{ background: BRAND }}>
             <Sparkles size={10} />
@@ -113,20 +63,16 @@ const OverallInsights = ({ habits, plan, onUpgrade }: { habits: Habit[]; plan: P
         )}
       </div>
 
-      <div className={isPro ? '' : 'pointer-events-none select-none blur-[6px]'}>
-        <p className="mb-3 text-sm text-zinc-700 dark:text-zinc-300">
-          Tu día más constante es el <span className="font-semibold">{dayNames[bestDayIdx]}</span>.
-        </p>
-        <div className="flex items-end justify-between gap-1.5 h-20">
-          {avgByDay.map((v, i) => (
-            <div key={i} className="flex flex-1 flex-col items-center gap-1.5">
-              <div className="flex h-14 w-full items-end rounded-md bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-                <div className="w-full rounded-md" style={{ height: `${Math.max(4, v)}%`, background: BRAND }} />
-              </div>
-              <span className="text-[10px] text-zinc-400">{['D', 'L', 'M', 'X', 'J', 'V', 'S'][i]}</span>
+      <div className={isPro ? 'space-y-2.5' : 'space-y-2.5 pointer-events-none select-none blur-[6px]'}>
+        {top.map(([icon, count]) => (
+          <div key={icon} className="flex items-center gap-3">
+            <EventIcon name={icon as HEvent['icon']} size={16} className="shrink-0 text-zinc-500 dark:text-zinc-400" />
+            <div className="h-2 flex-1 overflow-hidden rounded-full bg-zinc-100 dark:bg-zinc-800">
+              <div className="h-full rounded-full" style={{ width: `${(count / max) * 100}%`, background: BRAND }} />
             </div>
-          ))}
-        </div>
+            <span className="w-4 text-right text-xs text-zinc-400">{count}</span>
+          </div>
+        ))}
       </div>
 
       {!isPro && (

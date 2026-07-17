@@ -1,11 +1,11 @@
 const TIP_KEY = 'loop.dailyTip.v1'
 
 const FALLBACK_TIPS = [
-  'Un hábito pequeño hecho todos los días vale más que uno grande hecho una vez.',
-  'No rompas la cadena dos días seguidos: fallar un día es humano, fallar dos ya es un hábito nuevo.',
-  'La motivación te hace empezar, la constancia te hace llegar.',
-  'Hazlo tan fácil que no puedas decir que no tienes tiempo.',
-  'El mejor momento para retomar un hábito es hoy, no el lunes que viene.',
+  'Cada día que pasa es un día menos para lo que estás esperando.',
+  'La espera se hace más ligera cuando sabes exactamente cuánto queda.',
+  'Anotar una fecha importante es la mejor forma de no dejarla pasar de largo.',
+  'La ilusión por lo que viene también se cuida día a día.',
+  'Lo que se cuenta, se recuerda. Lo que se recuerda, se disfruta más.',
 ]
 
 interface CachedTip {

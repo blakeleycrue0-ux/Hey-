@@ -4,7 +4,6 @@ import {
   ChevronRight,
   Crown,
   Download,
-  ListChecks,
   LogOut,
   Moon,
   RotateCcw,
@@ -14,14 +13,14 @@ import {
   Trophy,
   Upload,
 } from 'lucide-react'
-import { BRAND, FREE_HABIT_LIMIT, type Habit, type Plan } from '../types'
+import { BRAND, FREE_EVENT_LIMIT, type HEvent, type Plan } from '../types'
 import type { Prefs, Theme } from '../lib/storage'
 import type { AuthedUser } from '../hooks/useAuth'
 import { exportBackup, importBackup } from '../lib/backup'
 
 interface Props {
   user: AuthedUser
-  habits: Habit[]
+  events: HEvent[]
   archivedCount: number
   theme: Theme
   onSetTheme: (t: Theme) => void
@@ -32,8 +31,7 @@ interface Props {
   onResetData: () => void
   onOpenArchived: () => void
   onOpenAchievements: () => void
-  onOpenRoutines: () => void
-  onImportHabits: (habits: Habit[]) => void
+  onImportEvents: (events: HEvent[]) => void
 }
 
 const PLAN_LABEL: Record<Plan, string> = {
@@ -51,7 +49,7 @@ const THEME_ICON: Record<Theme, React.ReactNode> = {
 const THEME_CYCLE: Record<Theme, Theme> = { light: 'dark', dark: 'system', system: 'light' }
 
 const handleShare = () => {
-  const shareData = { title: 'Loop', text: 'Estoy construyendo hábitos con Loop.', url: window.location.origin }
+  const shareData = { title: 'Loop', text: 'Estoy usando Loop para no perder de vista mis fechas importantes.', url: window.location.origin }
   if (navigator.share) {
     navigator.share(shareData).catch(() => {})
   } else {
@@ -63,7 +61,7 @@ const APP_VERSION = '1.0.0'
 
 export const SettingsView = ({
   user,
-  habits,
+  events,
   archivedCount,
   theme,
   onSetTheme,
@@ -74,10 +72,9 @@ export const SettingsView = ({
   onResetData,
   onOpenArchived,
   onOpenAchievements,
-  onOpenRoutines,
-  onImportHabits,
+  onImportEvents,
 }: Props) => {
-  const activeCount = habits.filter((h) => !h.archived).length
+  const activeCount = events.filter((e) => !e.archived).length
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   return (
@@ -90,7 +87,7 @@ export const SettingsView = ({
         <div className="min-w-0 flex-1">
           <p className="text-base font-bold">{PLAN_LABEL[user.plan]}</p>
           <p className="text-xs text-white/60">
-            {user.plan === 'free' ? `${activeCount}/${FREE_HABIT_LIMIT} hábitos usados · Mejora a Pro` : 'Hábitos e insights ilimitados'}
+            {user.plan === 'free' ? `${activeCount}/${FREE_EVENT_LIMIT} eventos usados · Mejora a Pro` : 'Eventos e insights ilimitados'}
           </p>
         </div>
         <Crown size={26} className="text-white/80" />
@@ -129,24 +126,10 @@ export const SettingsView = ({
             onToggle={() => onUpdatePrefs({ darkByTime: !prefs.darkByTime })}
           />
         )}
-        <Row
-          icon={<CalendarIcon />}
-          title="La semana empieza en"
-          subtitle={prefs.weekStartsOn === 'monday' ? 'Lunes' : 'Domingo'}
-          onClick={() => onUpdatePrefs({ weekStartsOn: prefs.weekStartsOn === 'monday' ? 'sunday' : 'monday' })}
-          chevron
-        />
-        <Row
-          icon={<SortIcon />}
-          title="Completados al final"
-          subtitle="Mueve los hábitos hechos abajo de la lista"
-          toggle={prefs.autoSortDone}
-          onToggle={() => onUpdatePrefs({ autoSortDone: !prefs.autoSortDone })}
-        />
       </Group>
 
       <Group>
-        <Row icon={<Download size={19} />} title="Exportar copia de seguridad" subtitle="Descarga tus hábitos en un archivo" onClick={() => exportBackup(habits)} chevron />
+        <Row icon={<Download size={19} />} title="Exportar copia de seguridad" subtitle="Descarga tus eventos en un archivo" onClick={() => exportBackup(events)} chevron />
         <Row
           icon={<Upload size={19} />}
           title="Importar copia de seguridad"
@@ -154,9 +137,8 @@ export const SettingsView = ({
           onClick={() => fileInputRef.current?.click()}
           chevron
         />
-        <Row icon={<Archive size={19} />} title="Hábitos archivados" subtitle={`${archivedCount} archivados`} onClick={onOpenArchived} chevron />
+        <Row icon={<Archive size={19} />} title="Eventos archivados" subtitle={`${archivedCount} archivados`} onClick={onOpenArchived} chevron />
         <Row icon={<Trophy size={19} />} title="Logros" subtitle="Insignias por tus hitos" onClick={onOpenAchievements} chevron />
-        <Row icon={<ListChecks size={19} />} title="Rutinas" subtitle="Agrupa hábitos para marcarlos juntos" onClick={onOpenRoutines} chevron />
       </Group>
       <input
         ref={fileInputRef}
@@ -165,35 +147,22 @@ export const SettingsView = ({
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0]
-          if (file) importBackup(file).then(onImportHabits).catch(() => alert('No se pudo leer el archivo.'))
+          if (file) importBackup(file).then(onImportEvents).catch(() => alert('No se pudo leer el archivo.'))
           e.target.value = ''
         }}
       />
 
       <Group>
         <Row icon={<Share2 size={19} />} title="Compartir Loop" subtitle="Invita a un amigo" onClick={handleShare} chevron />
-        <Row icon={<RotateCcw size={19} />} title="Reiniciar datos" subtitle="Borra todos tus hábitos" onClick={onResetData} chevron />
+        <Row icon={<RotateCcw size={19} />} title="Reiniciar datos" subtitle="Borra todos tus eventos" onClick={onResetData} chevron />
         <Row icon={<LogOut size={19} />} title="Cerrar sesión" onClick={onLogout} danger />
       </Group>
 
-      <p className="mt-6 text-center text-xs text-zinc-400">Tus hábitos se guardan en este dispositivo</p>
+      <p className="mt-6 text-center text-xs text-zinc-400">Tus eventos se guardan en este dispositivo</p>
       <p className="mt-1 text-center text-xs text-zinc-300 dark:text-zinc-600">Versión {APP_VERSION}</p>
     </div>
   )
 }
-
-const CalendarIcon = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="4" width="18" height="18" rx="2" />
-    <path d="M16 2v4M8 2v4M3 10h18" />
-  </svg>
-)
-
-const SortIcon = () => (
-  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M11 5h10M11 9h7M11 13h4M3 17l3 3 3-3M6 18V4" />
-  </svg>
-)
 
 const Group = ({ children }: { children: React.ReactNode }) => (
   <div className="mt-3 overflow-hidden rounded-2xl bg-white dark:bg-white/[0.04] border border-black/5 dark:border-white/[0.06] first:mt-0 divide-y divide-black/5 dark:divide-white/[0.06]">

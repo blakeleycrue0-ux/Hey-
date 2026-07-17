@@ -1,5 +1,5 @@
-import type { Habit } from '../types'
-import { longestStreak } from './streaks'
+import type { HEvent } from '../types'
+import { totalDaysSpan } from './countdown'
 
 export interface Achievement {
   id: string
@@ -8,20 +8,21 @@ export interface Achievement {
   unlocked: boolean
 }
 
-export const computeAchievements = (habits: Habit[]): Achievement[] => {
-  const all = habits
-  const bestStreak = all.reduce((best, h) => Math.max(best, longestStreak(h)), 0)
-  const totalCompletions = all.reduce((sum, h) => sum + h.completions.length, 0)
-  const activeCount = all.filter((h) => !h.archived).length
+export const computeAchievements = (events: HEvent[]): Achievement[] => {
+  const active = events.filter((e) => !e.archived)
+  const archivedCount = events.filter((e) => e.archived).length
+  const hasYearly = events.some((e) => e.repeatYearly)
+  const hasLongHaul = events.some((e) => totalDaysSpan(e) >= 180)
+  const iconSet = new Set(events.map((e) => e.icon))
 
   return [
-    { id: 'first-habit', title: 'Primeros pasos', description: 'Crea tu primer hábito', unlocked: all.length >= 1 },
-    { id: 'week', title: 'Una semana', description: 'Racha de 7 días en un hábito', unlocked: bestStreak >= 7 },
-    { id: 'month', title: 'Un mes', description: 'Racha de 30 días en un hábito', unlocked: bestStreak >= 30 },
-    { id: 'hundred', title: 'Cien días', description: 'Racha de 100 días en un hábito', unlocked: bestStreak >= 100 },
-    { id: 'year', title: 'Un año', description: 'Racha de 365 días en un hábito', unlocked: bestStreak >= 365 },
-    { id: 'consistent', title: 'Constante', description: '50 hábitos completados en total', unlocked: totalCompletions >= 50 },
-    { id: 'unstoppable', title: 'Imparable', description: '250 hábitos completados en total', unlocked: totalCompletions >= 250 },
-    { id: 'collector', title: 'Coleccionista', description: '5 hábitos activos a la vez', unlocked: activeCount >= 5 },
+    { id: 'first-event', title: 'Primer paso', description: 'Crea tu primera cuenta atrás', unlocked: events.length >= 1 },
+    { id: 'collector', title: 'Organizado', description: '3 eventos activos a la vez', unlocked: active.length >= 3 },
+    { id: 'planner', title: 'Planificador', description: '5 eventos activos a la vez', unlocked: active.length >= 5 },
+    { id: 'yearly', title: 'No se me olvida', description: 'Sigue un cumpleaños o aniversario que se repite', unlocked: hasYearly },
+    { id: 'traveler', title: 'De viaje', description: 'Añade una cuenta atrás para un viaje', unlocked: iconSet.has('Plane') },
+    { id: 'graduate', title: 'A por todas', description: 'Añade una cuenta atrás para un examen o entrega', unlocked: iconSet.has('GraduationCap') || iconSet.has('FileText') },
+    { id: 'longhaul', title: 'Larga espera', description: 'Sigue un evento a más de 180 días vista', unlocked: hasLongHaul },
+    { id: 'archiver', title: 'Ya está', description: 'Archiva un evento que ya haya pasado', unlocked: archivedCount >= 1 },
   ]
 }

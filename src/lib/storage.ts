@@ -1,22 +1,22 @@
-import type { Habit, Plan } from '../types'
+import type { HEvent, Plan } from '../types'
 
-const HABITS_KEY = 'loop.habits.v1'
+const EVENTS_KEY = 'loop.events.v1'
 const THEME_KEY = 'loop.theme.v1'
 const USER_KEY = 'loop.user.v1'
 const PREFS_KEY = 'loop.prefs.v1'
 
-export const loadHabits = (): Habit[] => {
+export const loadEvents = (): HEvent[] => {
   try {
-    const raw = localStorage.getItem(HABITS_KEY)
+    const raw = localStorage.getItem(EVENTS_KEY)
     if (!raw) return []
-    return JSON.parse(raw) as Habit[]
+    return JSON.parse(raw) as HEvent[]
   } catch {
     return []
   }
 }
 
-export const saveHabits = (habits: Habit[]): void => {
-  localStorage.setItem(HABITS_KEY, JSON.stringify(habits))
+export const saveEvents = (events: HEvent[]): void => {
+  localStorage.setItem(EVENTS_KEY, JSON.stringify(events))
 }
 
 export type Theme = 'light' | 'dark' | 'system'
@@ -57,12 +57,10 @@ export const saveProfile = (userId: string, profile: Profile): void => {
 }
 
 export interface Prefs {
-  weekStartsOn: 'monday' | 'sunday'
-  autoSortDone: boolean
   darkByTime: boolean
 }
 
-const DEFAULT_PREFS: Prefs = { weekStartsOn: 'monday', autoSortDone: false, darkByTime: false }
+const DEFAULT_PREFS: Prefs = { darkByTime: false }
 
 export const loadPrefs = (): Prefs => {
   try {

@@ -1,25 +1,22 @@
-export interface Habit {
+export interface HEvent {
   id: string
   name: string
-  icon: HabitIconKey
-  color: HabitColor
-  /** Days of week this habit is scheduled on, 0 = Sunday ... 6 = Saturday. 7 entries = every day. */
-  days: number[]
+  /** Date being counted down to, 'YYYY-MM-DD'. */
+  targetDate: string
+  /** Date the countdown started being tracked, 'YYYY-MM-DD' — sets the dot-grid density. */
   createdAt: string
-  /** Set of 'YYYY-MM-DD' dates the habit was completed on. */
-  completions: string[]
+  icon: EventIconKey
+  color: EventColor
+  /** Birthdays, anniversaries, etc. — recalculates to the next occurrence once it passes. */
+  repeatYearly: boolean
   archived: boolean
-  /** Last 'YYYY-MM-DD' the habit is paused through (inclusive); unset when not paused. */
-  pausedUntil?: string
-  /** Optional short note per completion date, keyed by 'YYYY-MM-DD'. */
-  notes?: Record<string, string>
-  /** Optional reminder time 'HH:MM' (24h), only fires while the app is open. */
-  reminderTime?: string
+  /** Notify this many days before the target date (best-effort, only while the app is open). */
+  reminderDaysBefore?: number
 }
 
-export type HabitColor = 'navy' | 'teal' | 'amber' | 'rose' | 'emerald' | 'sky' | 'violet' | 'orange'
+export type EventColor = 'navy' | 'teal' | 'amber' | 'rose' | 'emerald' | 'sky' | 'violet' | 'orange'
 
-export const HABIT_COLORS: Record<HabitColor, string> = {
+export const EVENT_COLORS: Record<EventColor, string> = {
   navy: '#22314F',
   teal: '#0d9488',
   amber: '#d97706',
@@ -35,119 +32,35 @@ export const BRAND = '#111111'
 export const BRAND_SOFT = '#2E2E2E'
 export const CREAM = '#F4F1EA'
 
-export type HabitIconKey =
-  | 'Droplet' | 'Moon' | 'BookOpen' | 'Dumbbell' | 'PenLine' | 'Heart' | 'Pill' | 'Sun'
-  | 'Footprints' | 'Brain' | 'GraduationCap' | 'Wallet' | 'Ban' | 'Coffee' | 'Smartphone'
-  | 'Wine' | 'Cigarette' | 'Candy' | 'Salad' | 'Bed' | 'Timer' | 'Target' | 'Smile'
-  | 'Sparkles' | 'Music' | 'Palette' | 'Users' | 'Home' | 'Leaf' | 'Bike' | 'PiggyBank'
-  | 'TrendingUp' | 'Calendar' | 'Flame'
+export type EventIconKey =
+  | 'Cake' | 'Plane' | 'GraduationCap' | 'Heart' | 'Gift' | 'PartyPopper' | 'Briefcase'
+  | 'Home' | 'Baby' | 'Gem' | 'Trophy' | 'Sun' | 'Snowflake' | 'Calendar' | 'Star'
+  | 'Flag' | 'Car' | 'FileText' | 'Clock' | 'MapPin' | 'Stethoscope' | 'Music' | 'Users' | 'Sparkles'
 
-export interface SuggestedHabit {
-  name: string
-  icon: HabitIconKey
-}
-
-export interface HabitCategory {
-  id: string
-  label: string
-  icon: HabitIconKey
-  habits: SuggestedHabit[]
-}
-
-export const CATEGORIES: HabitCategory[] = [
-  {
-    id: 'popular',
-    label: 'Popular',
-    icon: 'Sparkles',
-    habits: [
-      { name: 'Drink water', icon: 'Droplet' },
-      { name: 'Sleep 8 hours', icon: 'Moon' },
-      { name: 'Meditate', icon: 'Brain' },
-      { name: 'Read', icon: 'BookOpen' },
-      { name: 'Exercise', icon: 'Dumbbell' },
-      { name: 'No phone before bed', icon: 'Smartphone' },
-      { name: 'Journal', icon: 'PenLine' },
-    ],
-  },
-  {
-    id: 'health',
-    label: 'Salud y medicación',
-    icon: 'Heart',
-    habits: [
-      { name: 'Take medication', icon: 'Pill' },
-      { name: 'Drink water', icon: 'Droplet' },
-      { name: 'Stretch', icon: 'Footprints' },
-      { name: 'Take vitamins', icon: 'Pill' },
-      { name: 'Sleep 8 hours', icon: 'Bed' },
-    ],
-  },
-  {
-    id: 'study',
-    label: 'Estudios',
-    icon: 'GraduationCap',
-    habits: [
-      { name: 'Study', icon: 'BookOpen' },
-      { name: 'Practice a language', icon: 'GraduationCap' },
-      { name: 'Review notes', icon: 'PenLine' },
-      { name: 'Read', icon: 'BookOpen' },
-    ],
-  },
-  {
-    id: 'sport',
-    label: 'Deporte',
-    icon: 'Dumbbell',
-    habits: [
-      { name: 'Workout', icon: 'Dumbbell' },
-      { name: 'Run', icon: 'Footprints' },
-      { name: 'Yoga', icon: 'Leaf' },
-      { name: 'Walk 10k steps', icon: 'Footprints' },
-      { name: 'Bike ride', icon: 'Bike' },
-    ],
-  },
-  {
-    id: 'quit',
-    label: 'Malos hábitos',
-    icon: 'Ban',
-    habits: [
-      { name: 'No smoking', icon: 'Cigarette' },
-      { name: 'No sugar', icon: 'Candy' },
-      { name: 'No social media', icon: 'Smartphone' },
-      { name: 'No alcohol', icon: 'Wine' },
-      { name: 'No junk food', icon: 'Salad' },
-    ],
-  },
-  {
-    id: 'finance',
-    label: 'Finanzas',
-    icon: 'Wallet',
-    habits: [
-      { name: 'Track expenses', icon: 'Wallet' },
-      { name: 'No impulse buying', icon: 'Ban' },
-      { name: 'Save money', icon: 'PiggyBank' },
-      { name: 'Review budget', icon: 'TrendingUp' },
-    ],
-  },
-  {
-    id: 'personal',
-    label: 'Notas personales',
-    icon: 'PenLine',
-    habits: [
-      { name: 'Journal', icon: 'PenLine' },
-      { name: 'Gratitude', icon: 'Heart' },
-      { name: 'Plan tomorrow', icon: 'Calendar' },
-      { name: 'Reflect', icon: 'Brain' },
-    ],
-  },
+export const ALL_ICONS: EventIconKey[] = [
+  'Cake', 'Plane', 'GraduationCap', 'Heart', 'Gift', 'PartyPopper', 'Briefcase',
+  'Home', 'Baby', 'Gem', 'Trophy', 'Sun', 'Snowflake', 'Calendar', 'Star',
+  'Flag', 'Car', 'FileText', 'Clock', 'MapPin', 'Stethoscope', 'Music', 'Users', 'Sparkles',
 ]
 
-export const ALL_ICONS: HabitIconKey[] = [
-  'Droplet', 'Moon', 'BookOpen', 'Dumbbell', 'PenLine', 'Heart', 'Pill', 'Sun',
-  'Footprints', 'Brain', 'GraduationCap', 'Wallet', 'Ban', 'Coffee', 'Smartphone',
-  'Wine', 'Cigarette', 'Candy', 'Salad', 'Bed', 'Timer', 'Target', 'Smile',
-  'Sparkles', 'Music', 'Palette', 'Users', 'Home', 'Leaf', 'Bike', 'PiggyBank',
-  'TrendingUp', 'Calendar', 'Flame',
+export interface EventCategory {
+  id: string
+  label: string
+  icon: EventIconKey
+  color: EventColor
+  repeatYearly: boolean
+}
+
+export const EVENT_CATEGORIES: EventCategory[] = [
+  { id: 'birthday', label: 'Cumpleaños', icon: 'Cake', color: 'rose', repeatYearly: true },
+  { id: 'trip', label: 'Viaje', icon: 'Plane', color: 'sky', repeatYearly: false },
+  { id: 'study', label: 'Examen / estudios', icon: 'GraduationCap', color: 'violet', repeatYearly: false },
+  { id: 'work', label: 'Trabajo / entrega', icon: 'Briefcase', color: 'navy', repeatYearly: false },
+  { id: 'celebration', label: 'Celebración', icon: 'PartyPopper', color: 'amber', repeatYearly: false },
+  { id: 'personal', label: 'Personal', icon: 'Heart', color: 'emerald', repeatYearly: false },
+  { id: 'other', label: 'Otro', icon: 'Star', color: 'orange', repeatYearly: false },
 ]
 
 export type Plan = 'free' | 'monthly' | 'annual'
 
-export const FREE_HABIT_LIMIT = 3
+export const FREE_EVENT_LIMIT = 3

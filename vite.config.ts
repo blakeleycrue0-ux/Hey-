@@ -12,9 +12,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/favicon-32.png', 'icons/apple-touch-icon.png'],
       manifest: {
-        name: 'Loop — Build Your Streak',
+        name: 'Loop — Cuenta atrás',
         short_name: 'Loop',
-        description: 'Track daily habits, build streaks, never break the chain.',
+        description: 'Cuenta atrás para lo que de verdad importa.',
         theme_color: '#111111',
         background_color: '#F4F1EA',
         display: 'standalone',
